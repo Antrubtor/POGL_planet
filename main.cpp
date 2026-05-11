@@ -16,7 +16,6 @@
 
 #include "image.hh"
 #include "image_io.hh"
-/*#include "object_vbo.hh"*/
 #include "planet.hh"
 
 //#define SAVE_RENDEflat R
@@ -116,7 +115,7 @@ void init_GL()
 void init_object_vbo()
 {
     Planet myPlanet;
-    myPlanet.resolution = 10;
+    myPlanet.resolution = 200;
     myPlanet.GeneratePlanet();
     planet_index_count = myPlanet.planet_indices.size();
 

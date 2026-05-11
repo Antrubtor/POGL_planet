@@ -1,7 +1,5 @@
 #include "planet.hh"
 
-#include "terrain_face.hh"
-
 void Planet::GeneratePlanet()
 {
     planet_vertices.clear();
@@ -15,7 +13,7 @@ void Planet::GeneratePlanet()
 
     for (size_t i = 0; i < 6; i++)
     {
-        TerrainFace face(resolution, directions[i]);
+        TerrainFace face(resolution, directions[i], &shapeGenerator);
         face.ConstructMesh();
 
         for (const auto &v : face.vertices)

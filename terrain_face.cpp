@@ -1,17 +1,19 @@
 #include "terrain_face.hh"
 
-TerrainFace::TerrainFace(int resolution, glm::vec3 localUp)
+TerrainFace::TerrainFace(int resolution, glm::vec3 localUp,
+                         ShapeGenerator *shapeGenerator)
     : resolution(resolution)
     , localUp(localUp)
     , axisA(glm::vec3(localUp.y, localUp.z, localUp.x))
     , axisB(glm::cross(localUp, axisA))
+    , shapeGenerator(shapeGenerator)
 {}
 
 void TerrainFace::ConstructMesh()
 {
     vertices.clear();
     indices.clear();
-    vertices.resize(resolution * resolution);
+    /*vertices.resize(resolution * resolution);*/
 
     for (size_t y = 0; y < resolution; y++)
     {
@@ -22,7 +24,10 @@ void TerrainFace::ConstructMesh()
             glm::vec3 pointOnUnitCube = localUp + (percent.x - 0.5f) * 2 * axisA
                 + (percent.y - 0.5f) * 2 * axisB;
             glm::vec3 pointOnUnitSphere = glm::normalize(pointOnUnitCube);
-            vertices[i] = pointOnUnitSphere;
+
+            glm::vec3 pointOnPlanet =
+                shapeGenerator->CalculatePointOnPlanet(pointOnUnitSphere);
+            vertices.push_back(pointOnPlanet);
 
             if (x != resolution - 1 && y != resolution - 1)
             {

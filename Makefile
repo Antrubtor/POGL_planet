@@ -8,9 +8,9 @@
 
 CC = g++
 
-CPP_FILES = image.cpp image_io.cpp planet.cpp terrain_face.cpp
+CPP_FILES = image.cpp image_io.cpp planet.cpp terrain_face.cpp noise_filter.cpp shape_generator.cpp
 CPP_FILES +=
-HXX_FILES = image.hh image_io.hh planet.hh terrain_face.hh
+HXX_FILES = image.hh image_io.hh planet.hh terrain_face.hh noise_filter.hh shape_generator.hh
 HXX_FILES += object_vbo.hh
 OBJ_FILES = $(CPP_FILES:.cpp=.o)
 
