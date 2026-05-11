@@ -12,13 +12,13 @@
 #include <iostream>
 #include <vector>
 
-//#include <glt_transform.hh>
+// #include <glt_transform.hh>
 
 #include "image.hh"
 #include "image_io.hh"
 #include "planet.hh"
 
-//#define SAVE_RENDEflat R
+// #define SAVE_RENDEflat R
 
 #define TEST_OPENGL_ERROR()                                                    \
     do                                                                         \
@@ -115,7 +115,7 @@ void init_GL()
 void init_object_vbo()
 {
     Planet myPlanet;
-    myPlanet.resolution = 200;
+    myPlanet.resolution = 500;
     myPlanet.GeneratePlanet();
     planet_index_count = myPlanet.planet_indices.size();
 

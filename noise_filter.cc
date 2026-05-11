@@ -13,7 +13,7 @@ float NoiseFilter::Evaluate(glm::vec3 point) {
         for (int i = 0; i < numLayers; i++) {
             glm::vec3 p = (point + center) * frequency * 100.0f;
             float v = noise.GetNoise(p.x, p.y, p.z);
-            v = (v + 1.0f) * 0.5f; 
+            v = (v + 1.0f) * 0.5f;
             noiseValue += v * amplitude;
             frequency *= roughness;
             amplitude *= persistence;

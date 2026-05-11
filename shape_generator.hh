@@ -2,7 +2,7 @@
 class ShapeGenerator
 {
 public:
-    float planetRadius = 1.0f;
+    float planetRadius = 3.0f;
     NoiseFilter noiseFilter;
 
     glm::vec3 CalculatePointOnPlanet(glm::vec3 pointOnUnitSphere);
