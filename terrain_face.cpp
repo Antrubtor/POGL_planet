@@ -13,7 +13,6 @@ void TerrainFace::ConstructMesh()
 {
     vertices.clear();
     indices.clear();
-    /*vertices.resize(resolution * resolution);*/
 
     for (size_t y = 0; y < resolution; y++)
     {

@@ -80,12 +80,17 @@ void display()
         glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
         glBufferData(GL_ARRAY_BUFFER,
                      myPlanet.planet_vertices.size() * sizeof(GLfloat),
-                     myPlanet.planet_vertices.data(), GL_STATIC_DRAW);
+                     myPlanet.planet_vertices.data(), GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_id);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                      myPlanet.planet_indices.size() * sizeof(GLuint),
                      myPlanet.planet_indices.data(), GL_STATIC_DRAW);
+
+        GLint min_loc = glGetUniformLocation(program_id, "minElevation");
+        GLint max_loc = glGetUniformLocation(program_id, "maxElevation");
+        glUniform1f(min_loc, myPlanet.shapeGenerator.elevationMinMax.Min);
+        glUniform1f(max_loc, myPlanet.shapeGenerator.elevationMinMax.Max);
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -228,6 +233,12 @@ void init_object_vbo()
                  myPlanet.planet_indices.size() * sizeof(GLuint),
                  myPlanet.planet_indices.data(), GL_STATIC_DRAW);
     TEST_OPENGL_ERROR();
+
+    GLint min_loc = glGetUniformLocation(program_id, "minElevation");
+    GLint max_loc = glGetUniformLocation(program_id, "maxElevation");
+
+    glUniform1f(min_loc, myPlanet.shapeGenerator.elevationMinMax.Min);
+    glUniform1f(max_loc, myPlanet.shapeGenerator.elevationMinMax.Max);
     glBindVertexArray(0);
 }
 

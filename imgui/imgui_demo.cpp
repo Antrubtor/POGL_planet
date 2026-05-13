@@ -172,16 +172,15 @@ ShowExampleAppCustomRendering()
 // Visual Studio warnings
 #    ifdef _MSC_VER
 #        pragma warning(disable : 4127) // condition expression is constant
+#        pragma warning(disable : 4996) // 'This function or variable may be
+                                        // unsafe': strcpy, strdup, sprintf,
+                                        // vsnprintf, sscanf, fopen
 #        pragma warning(                                                       \
-            disable                                                            \
-            : 4996) // 'This function or variable may be unsafe': strcpy,
-                    // strdup, sprintf, vsnprintf, sscanf, fopen
-#        pragma warning(                                                       \
-            disable                                                            \
-            : 26451) // [Static Analyzer] Arithmetic overflow : Using operator
-                     // 'xxx' on a 4 byte value and then casting the result to
-                     // an 8 byte value. Cast the value to the wider type before
-                     // calling operator 'xxx' to avoid overflow(io.2).
+            disable : 26451) // [Static Analyzer] Arithmetic overflow : Using
+                             // operator 'xxx' on a 4 byte value and then
+                             // casting the result to an 8 byte value. Cast the
+                             // value to the wider type before calling operator
+                             // 'xxx' to avoid overflow(io.2).
 #    endif
 
 // Clang/GCC warnings with -Weverything
@@ -5796,8 +5795,7 @@ static void DemoWindowWidgetsTreeNodes()
                     ImGui::Text("blah blah");
                     ImGui::SameLine();
                     if (ImGui::SmallButton("button"))
-                    {
-                    }
+                    {}
                     ImGui::TreePop();
                 }
                 ImGui::PopID();
@@ -5961,8 +5959,7 @@ static void DemoWindowWidgetsTreeNodes()
                         // demonstrate SpanLabelWidth.
                         ImGui::SameLine();
                         if (ImGui::SmallButton("button"))
-                        {
-                        }
+                        {}
                     }
                     if (node_open)
                     {
@@ -7533,8 +7530,7 @@ static void DemoWindowPopups()
                 if (ImGui::BeginMenu("File"))
                 {
                     if (ImGui::MenuItem("Some menu item"))
-                    {
-                    }
+                    {}
                     ImGui::EndMenu();
                 }
                 ImGui::EndMenuBar();
@@ -9536,10 +9532,11 @@ static void DemoWindowTables()
                 ImGui::TableSetupColumn(column_names[n], column_flags);
             ImGui::TableSetupScrollFreeze(frozen_cols, frozen_rows);
 
-            ImGui::TableAngledHeadersRow(); // Draw angled headers for all
-                                            // columns with the
-                                            // ImGuiTableColumnFlags_AngledHeader
-                                            // flag.
+            ImGui::
+                TableAngledHeadersRow(); // Draw angled headers for all
+                                         // columns with the
+                                         // ImGuiTableColumnFlags_AngledHeader
+                                         // flag.
             ImGui::TableHeadersRow(); // Draw remaining headers and allow access
                                       // to context-menu and other functions.
             for (int row = 0; row < rows_count; row++)
@@ -10215,9 +10212,9 @@ static void DemoWindowTables()
             if (show_headers)
                 ImGui::TableHeadersRow();
 
-            // Show data
-            // FIXME-TABLE FIXME-NAV: How we can get decent up/down even though
-            // we have the buttons here?
+                // Show data
+                // FIXME-TABLE FIXME-NAV: How we can get decent up/down even
+                // though we have the buttons here?
 #        if 1
             // Demonstrate using clipper for large vertical lists
             ImGuiListClipper clipper;
@@ -10390,8 +10387,7 @@ static void DemoWindowColumns()
             char label[32];
             sprintf(label, "Item %d", n);
             if (ImGui::Selectable(label))
-            {
-            }
+            {}
             // if (ImGui::Button(label, ImVec2(-FLT_MIN,0.0f))) {}
             ImGui::NextColumn();
         }
@@ -12004,21 +12000,16 @@ static void ShowExampleAppMainMenuBar()
         {
             IMGUI_DEMO_MARKER("Menu/Edit");
             if (ImGui::MenuItem("Undo", "Ctrl+Z"))
-            {
-            }
+            {}
             if (ImGui::MenuItem("Redo", "Ctrl+Y", false, false))
-            {
-            } // Disabled item
+            {} // Disabled item
             ImGui::Separator();
             if (ImGui::MenuItem("Cut", "Ctrl+X"))
-            {
-            }
+            {}
             if (ImGui::MenuItem("Copy", "Ctrl+C"))
-            {
-            }
+            {}
             if (ImGui::MenuItem("Paste", "Ctrl+V"))
-            {
-            }
+            {}
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
@@ -12033,11 +12024,9 @@ static void ShowExampleMenuFile()
     IMGUI_DEMO_MARKER("Examples/Menu");
     ImGui::MenuItem("(demo menu)", NULL, false, false);
     if (ImGui::MenuItem("New"))
-    {
-    }
+    {}
     if (ImGui::MenuItem("Open", "Ctrl+O"))
-    {
-    }
+    {}
     if (ImGui::BeginMenu("Open Recent"))
     {
         ImGui::MenuItem("fish_hat.c");
@@ -12057,11 +12046,9 @@ static void ShowExampleMenuFile()
         ImGui::EndMenu();
     }
     if (ImGui::MenuItem("Save", "Ctrl+S"))
-    {
-    }
+    {}
     if (ImGui::MenuItem("Save As.."))
-    {
-    }
+    {}
 
     ImGui::Separator();
     if (ImGui::BeginMenu("Options"))
@@ -12118,12 +12105,10 @@ static void ShowExampleMenuFile()
         IM_ASSERT(0);
     }
     if (ImGui::MenuItem("Checked", NULL, true))
-    {
-    }
+    {}
     ImGui::Separator();
     if (ImGui::MenuItem("Quit", "Alt+F4"))
-    {
-    }
+    {}
 }
 
 //-----------------------------------------------------------------------------
@@ -12866,12 +12851,10 @@ static void ShowExampleAppLayout(bool *p_open)
             }
             ImGui::EndChild();
             if (ImGui::Button("Revert"))
-            {
-            }
+            {}
             ImGui::SameLine();
             if (ImGui::Button("Save"))
-            {
-            }
+            {}
             ImGui::EndGroup();
         }
     }

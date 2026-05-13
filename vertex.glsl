@@ -21,8 +21,10 @@ mat4 projection_matrix = mat4(
 			      0.00000, 0.00000, -10.00100, 0.00000);
 
 out vec3 vPos;
+out vec3 localPos;
 
 void main() {
     gl_Position = projection_matrix * model_view_matrix * vec4(position, 1.0);
     vPos = vec3(model_view_matrix * vec4(position, 1.0));
+    localPos = position;
 }

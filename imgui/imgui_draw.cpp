@@ -48,20 +48,18 @@ Index of this file:
 #        pragma warning(disable : 4127) // condition expression is constant
 #        pragma warning(disable : 4505) // unreferenced local function has been
                                         // removed (stb stuff)
+#        pragma warning(disable : 4996) // 'This function or variable may be
+                                        // unsafe': strcpy, strdup, sprintf,
+                                        // vsnprintf, sscanf, fopen
 #        pragma warning(                                                       \
-            disable                                                            \
-            : 4996) // 'This function or variable may be unsafe': strcpy,
-                    // strdup, sprintf, vsnprintf, sscanf, fopen
-#        pragma warning(                                                       \
-            disable                                                            \
-            : 26451) // [Static Analyzer] Arithmetic overflow : Using operator
-                     // 'xxx' on a 4 byte value and then casting the result to a
-                     // 8 byte value. Cast the value to the wider type before
-                     // calling operator 'xxx' to avoid overflow(io.2).
-#        pragma warning(                                                       \
-            disable                                                            \
-            : 26812) // [Static Analyzer] The enum type 'xxx' is unscoped.
-                     // Prefer 'enum class' over 'enum' (Enum.3).
+            disable : 26451) // [Static Analyzer] Arithmetic overflow : Using
+                             // operator 'xxx' on a 4 byte value and then
+                             // casting the result to a 8 byte value. Cast the
+                             // value to the wider type before calling operator
+                             // 'xxx' to avoid overflow(io.2).
+#        pragma warning(disable : 26812) // [Static Analyzer] The enum type
+                                         // 'xxx' is unscoped. Prefer 'enum
+                                         // class' over 'enum' (Enum.3).
 #    endif
 
 // Clang/GCC warnings with -Weverything
@@ -190,24 +188,20 @@ namespace IMGUI_STB_NAMESPACE
 
 #    ifdef _MSC_VER
 #        pragma warning(push)
+#        pragma warning(disable : 4456) // declaration of 'xx' hides previous
+                                        // local declaration
+#        pragma warning(disable : 6011) // (stb_rectpack) Dereferencing NULL
+                                        // pointer 'cur->next'.
 #        pragma warning(                                                       \
-            disable                                                            \
-            : 4456) // declaration of 'xx' hides previous local declaration
-#        pragma warning(                                                       \
-            disable                                                            \
-            : 6011) // (stb_rectpack) Dereferencing NULL pointer 'cur->next'.
-#        pragma warning(disable                                                \
-                        : 5262) // (stb_truetype) implicit fall-through occurs
-                                // here; are you missing a break statement?
-#        pragma warning(                                                       \
-            disable                                                            \
-            : 6385) // (stb_truetype) Reading invalid data from 'buffer':  the
-                    // readable size is '_Old_3`kernel_width' bytes, but '3'
-                    // bytes may be read.
-#        pragma warning(                                                       \
-            disable                                                            \
-            : 28182) // (stb_rectpack) Dereferencing NULL pointer. 'cur'
-                     // contains the same NULL value as 'cur->next' did.
+            disable : 5262) // (stb_truetype) implicit fall-through occurs
+                            // here; are you missing a break statement?
+#        pragma warning(disable : 6385) // (stb_truetype) Reading invalid data
+                                        // from 'buffer':  the readable size is
+                                        // '_Old_3`kernel_width' bytes, but '3'
+                                        // bytes may be read.
+#        pragma warning(disable : 28182) // (stb_rectpack) Dereferencing NULL
+                                         // pointer. 'cur' contains the same
+                                         // NULL value as 'cur->next' did.
 #    endif
 
 #    if defined(__clang__)
@@ -223,9 +217,10 @@ namespace IMGUI_STB_NAMESPACE
 #        pragma GCC diagnostic ignored                                         \
             "-Wtype-limits" // warning: comparison is always true due to limited
                             // range of data type [-Wtype-limits]
-#        pragma GCC diagnostic ignored "-Wimplicit-fallthrough" // warning: this
-                                                                // statement may
-                                                                // fall through
+#        pragma GCC diagnostic ignored                                         \
+            "-Wimplicit-fallthrough" // warning: this
+                                     // statement may
+                                     // fall through
 #    endif
 
 #    ifndef STB_RECT_PACK_IMPLEMENTATION // in case the user already have an
@@ -575,7 +570,7 @@ void ImDrawListSharedData::SetCircleTessellationMaxError(float max_error)
         const float radius = (float)i;
         CircleSegmentCounts[i] =
             (ImU8)((i > 0) ? IM_DRAWLIST_CIRCLE_AUTO_SEGMENT_CALC(
-                                 radius, CircleSegmentMaxError)
+                       radius, CircleSegmentMaxError)
                            : IM_DRAWLIST_ARCFAST_SAMPLE_MAX);
     }
     ArcFastRadiusCutoff = IM_DRAWLIST_CIRCLE_AUTO_SEGMENT_CALC_R(
@@ -3469,16 +3464,16 @@ static const ImVec2
           ImVec2(5, 0) }, // ImGuiMouseCursor_Hand
         { ImVec2(0, 3), ImVec2(12, 19),
           ImVec2(0, 0) }, // ImGuiMouseCursor_Wait       // Arrow + custom code
-                          // in ImGui::RenderMouseCursor()
+        // in ImGui::RenderMouseCursor()
         { ImVec2(0, 3), ImVec2(12, 19),
           ImVec2(0, 0) }, // ImGuiMouseCursor_Progress   // Arrow + custom code
-                          // in ImGui::RenderMouseCursor()
+        // in ImGui::RenderMouseCursor()
         { ImVec2(109, 0), ImVec2(13, 15),
           ImVec2(6, 7) }, // ImGuiMouseCursor_NotAllowed
     };
 
-#    define IM_FONTGLYPH_INDEX_UNUSED ((ImU16) - 1) // 0xFFFF
-#    define IM_FONTGLYPH_INDEX_NOT_FOUND ((ImU16) - 2) // 0xFFFE
+#    define IM_FONTGLYPH_INDEX_UNUSED ((ImU16)-1) // 0xFFFF
+#    define IM_FONTGLYPH_INDEX_NOT_FOUND ((ImU16)-2) // 0xFFFE
 
 ImFontAtlas::ImFontAtlas()
 {
@@ -4050,8 +4045,7 @@ ImFont *ImFontAtlas::AddFont(const ImFontConfig *font_cfg_in)
         int size = 0;
         for (const ImWchar *p = font_cfg->GlyphExcludeRanges; p[0] != 0;
              p++, size++)
-        {
-        }
+        {}
         IM_ASSERT((size & 1) == 0
                   && "GlyphExcludeRanges[] size must be multiple of two!");
         IM_ASSERT((size <= 64) && "GlyphExcludeRanges[] size must be small!");
@@ -4257,8 +4251,7 @@ ImFont *ImFontAtlas::AddFontFromFileTTF(const char *filename, float size_pixels,
         const char *p;
         for (p = filename + ImStrlen(filename);
              p > filename && p[-1] != '/' && p[-1] != '\\'; p--)
-        {
-        }
+        {}
         ImFormatString(font_cfg.Name, IM_COUNTOF(font_cfg.Name), "%s", p);
     }
     return AddFontFromMemoryTTF(data, (int)data_size, size_pixels, &font_cfg,
@@ -7150,11 +7143,12 @@ ImFontBaked *ImFontAtlasBakedGetOrAdd(ImFontAtlas *atlas, ImFont *font,
             return baked;
         if (atlas->Locked)
         {
-            IM_ASSERT(!atlas->Locked
-                      && "Cannot use dynamic font size with a locked "
-                         "ImFontAtlas!"); // Locked because rendering backend
-                                          // does not support
-                                          // ImGuiBackendFlags_RendererHasTextures!
+            IM_ASSERT(
+                !atlas->Locked
+                && "Cannot use dynamic font size with a locked "
+                   "ImFontAtlas!"); // Locked because rendering backend
+                                    // does not support
+                                    // ImGuiBackendFlags_RendererHasTextures!
             return NULL;
         }
     }
@@ -7215,7 +7209,7 @@ void ImTextClassifierSetCharClassFromStr(ImU32 *bits,
 }
 
 #    define ImTextClassifierGet(_BITS, _CHAR_OFFSET)                           \
-        ((_BITS[(_CHAR_OFFSET) >> 4] >> (((_CHAR_OFFSET) & 15) << 1)) & 0x03)
+        ((_BITS[(_CHAR_OFFSET) >> 4] >> (((_CHAR_OFFSET)&15) << 1)) & 0x03)
 
 // 2-bit per character
 static ImU32 g_CharClassifierIsSeparator_0000_007f[128 / 16] = {};

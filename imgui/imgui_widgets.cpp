@@ -56,24 +56,22 @@ Separator, etc.)
 // Visual Studio warnings
 #    ifdef _MSC_VER
 #        pragma warning(disable : 4127) // condition expression is constant
-#        pragma warning(                                                       \
-            disable                                                            \
-            : 4996) // 'This function or variable may be unsafe': strcpy,
-                    // strdup, sprintf, vsnprintf, sscanf, fopen
+#        pragma warning(disable : 4996) // 'This function or variable may be
+                                        // unsafe': strcpy, strdup, sprintf,
+                                        // vsnprintf, sscanf, fopen
 #        if defined(_MSC_VER) && _MSC_VER >= 1922 // MSVC 2019 16.2 or later
 #            pragma warning(disable : 5054) // operator '|': deprecated between
                                             // enumerations of different types
 #        endif
 #        pragma warning(                                                       \
-            disable                                                            \
-            : 26451) // [Static Analyzer] Arithmetic overflow : Using operator
-                     // 'xxx' on a 4 byte value and then casting the result to a
-                     // 8 byte value. Cast the value to the wider type before
-                     // calling operator 'xxx' to avoid overflow(io.2).
-#        pragma warning(                                                       \
-            disable                                                            \
-            : 26812) // [Static Analyzer] The enum type 'xxx' is unscoped.
-                     // Prefer 'enum class' over 'enum' (Enum.3).
+            disable : 26451) // [Static Analyzer] Arithmetic overflow : Using
+                             // operator 'xxx' on a 4 byte value and then
+                             // casting the result to a 8 byte value. Cast the
+                             // value to the wider type before calling operator
+                             // 'xxx' to avoid overflow(io.2).
+#        pragma warning(disable : 26812) // [Static Analyzer] The enum type
+                                         // 'xxx' is unscoped. Prefer 'enum
+                                         // class' over 'enum' (Enum.3).
 #    endif
 
 // Clang/GCC warnings with -Weverything
@@ -2280,7 +2278,7 @@ void ImGui::SeparatorEx(ImGuiSeparatorFlags flags, float thickness)
         // and it would not makes sense to have a disparity depending on height.
         ////float thickness_for_layout = (thickness == 1.0f) ? 0.0f : thickness;
         ///// FIXME: See 1.70/1.71 Separator() change: makes legacy 1-px
-        ///separator not affect layout yet. Should change.
+        /// separator not affect layout yet. Should change.
         const ImRect bb(ImVec2(x1, window->DC.CursorPos.y),
                         ImVec2(x2, window->DC.CursorPos.y + thickness));
         ItemSize(ImVec2(0.0f, thickness));
@@ -9575,8 +9573,8 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags,
     const ImVec2 padding = use_frame_padding
         ? style.FramePadding
         : ImVec2(
-              style.FramePadding.x,
-              ImMin(window->DC.CurrLineTextBaseOffset, style.FramePadding.y));
+            style.FramePadding.x,
+            ImMin(window->DC.CurrLineTextBaseOffset, style.FramePadding.y));
 
     if (!label_end)
         label_end = FindRenderedTextEnd(label);
@@ -11053,7 +11051,7 @@ static ImRect CalcScopeRect(ImGuiMultiSelectTempData *ms, ImGuiWindow *window)
     else
     {
         //// When a table, pull HostClipRect, which allows us to predict
-        ///ClipRect before first row/layout is performed. (#7970)
+        /// ClipRect before first row/layout is performed. (#7970)
         ImRect scope_rect = window->InnerClipRect;
         // if (g.CurrentTable != NULL)
         //     scope_rect = g.CurrentTable->HostClipRect;
@@ -13206,9 +13204,11 @@ bool ImGui::BeginMenuEx(const char *label, const char *icon, bool enabled)
     else if (want_open)
     {
         menu_is_open = true;
-        OpenPopup(label, ImGuiPopupFlags_NoReopen); // | (want_open_nav_init ?
-                                                    // ImGuiPopupFlags_NoReopenAlwaysNavInit
-                                                    // : 0));
+        OpenPopup(
+            label,
+            ImGuiPopupFlags_NoReopen); // | (want_open_nav_init ?
+                                       // ImGuiPopupFlags_NoReopenAlwaysNavInit
+                                       // : 0));
     }
 
     if (menu_is_open)
@@ -14986,9 +14986,9 @@ void ImGui::TabItemLabelAndCloseButton(ImDrawList *draw_list, const ImRect &bb,
     if (bb.GetWidth() <= 1.0f)
         return;
 
-    // In Style V2 we'll have full override of all colors per state (e.g.
-    // focused, selected) But right now if you want to alter text color of tabs
-    // this is what you need to do.
+        // In Style V2 we'll have full override of all colors per state (e.g.
+        // focused, selected) But right now if you want to alter text color of
+        // tabs this is what you need to do.
 #    if 0
     const float backup_alpha = g.Style.Alpha;
     if (!is_contents_visible)

@@ -474,7 +474,7 @@ static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData *draw_data,
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 #    endif
 
-    // Support for GL 4.5 rarely used glClipControl(GL_UPPER_LEFT)
+        // Support for GL 4.5 rarely used glClipControl(GL_UPPER_LEFT)
 #    if defined(GL_CLIP_ORIGIN)
     bool clip_origin_lower_left = true;
     if (bd->HasClipOrigin)
