@@ -8,13 +8,13 @@
 
 CC = g++
 
-CPP_FILES = image.cpp image_io.cpp planet.cpp terrain_face.cpp noise_filter.cpp shape_generator.cpp
+CPP_FILES = image.cpp image_io.cpp planet.cpp terrain_face.cpp noise_filter.cpp shape_generator.cpp imgui/imgui.cpp imgui/imgui_draw.cpp imgui/imgui_tables.cpp imgui/imgui_widgets.cpp imgui/imgui_impl_glut.cpp imgui/imgui_impl_opengl3.cpp
 CPP_FILES +=
 HXX_FILES = image.hh image_io.hh planet.hh terrain_face.hh noise_filter.hh shape_generator.hh
 HXX_FILES += object_vbo.hh
 OBJ_FILES = $(CPP_FILES:.cpp=.o)
 
-CXX_FLAGS += -Wall -Wextra -O3 -g -std=c++11
+CXX_FLAGS += -Wall -Wextra -O3 -g -std=c++17
 CXX_FLAGS +=
 CXX_FLAGS += -m64 -march=native
 CXX_FLAGS += -fopt-info-vec-optimized #-fopt-info-vec-missed -ftree-vectorize

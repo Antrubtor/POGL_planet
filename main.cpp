@@ -16,6 +16,9 @@
 
 #include "image.hh"
 #include "image_io.hh"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glut.h"
+#include "imgui/imgui_impl_opengl3.h"
 #include "planet.hh"
 
 // #define SAVE_RENDEflat R
@@ -31,7 +34,9 @@
 GLuint planet_vao_id;
 GLuint program_id;
 GLuint ebo_id;
+GLuint vbo_id;
 GLsizei planet_index_count = 0;
+Planet myPlanet;
 
 void window_resize(int width, int height)
 {
@@ -47,6 +52,42 @@ bool saved = false;
 
 void display()
 {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGLUT_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("Parametres de Generation");
+    bool changed = false;
+    NoiseFilter &nf = myPlanet.shapeGenerator.noiseFilter;
+    changed |= ImGui::SliderFloat("Strength", &nf.strength, 0.0f, 2.0f);
+    changed |= ImGui::SliderInt("Num Layers", &nf.numLayers, 1, 10);
+    changed |=
+        ImGui::SliderFloat("Base Roughness", &nf.baseRoughness, 0.1f, 5.0f);
+    changed |= ImGui::SliderFloat("Roughness", &nf.roughness, 0.1f, 5.0f);
+    changed |= ImGui::SliderFloat("Persistence", &nf.persistence, 0.1f, 1.0f);
+    changed |= ImGui::SliderFloat("Min Value", &nf.minValue, 0.0f, 2.0f);
+    changed |=
+        ImGui::SliderFloat("Weight Mult", &nf.weightMultiplier, 0.0f, 3.0f);
+    changed |=
+        ImGui::SliderFloat3("Center (Offset)", &nf.center.x, -5.0f, 5.0f);
+
+    ImGui::End();
+    if (changed)
+    {
+        myPlanet.GeneratePlanet();
+        planet_index_count = myPlanet.planet_indices.size();
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
+        glBufferData(GL_ARRAY_BUFFER,
+                     myPlanet.planet_vertices.size() * sizeof(GLfloat),
+                     myPlanet.planet_vertices.data(), GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_id);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                     myPlanet.planet_indices.size() * sizeof(GLuint),
+                     myPlanet.planet_indices.data(), GL_STATIC_DRAW);
+    }
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     TEST_OPENGL_ERROR();
     glBindVertexArray(planet_vao_id);
@@ -56,6 +97,10 @@ void display()
     TEST_OPENGL_ERROR();
     glBindVertexArray(0);
     TEST_OPENGL_ERROR();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 #if defined(SAVE_RENDER)
     if (!saved)
     {
@@ -72,6 +117,7 @@ void display()
     }
 #endif
     glutSwapBuffers();
+    glutPostRedisplay();
 }
 
 void init_glut(int &argc, char *argv[])
@@ -112,10 +158,21 @@ void init_GL()
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
 }
 
+void init_imgui()
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplGLUT_Init();
+    ImGui_ImplOpenGL3_Init("#version 450");
+}
+
 void init_object_vbo()
 {
-    Planet myPlanet;
-    myPlanet.resolution = 500;
+    myPlanet.resolution = 256;
     myPlanet.GeneratePlanet();
     planet_index_count = myPlanet.planet_indices.size();
 
@@ -136,7 +193,6 @@ void init_object_vbo()
               << ((normal_smooth_location == -1) ? " NOT FOUND!" : " OK")
               << std::endl;
 
-    GLuint vbo_id;
     glGenBuffers(1, &vbo_id);
     TEST_OPENGL_ERROR();
     glGenBuffers(1, &ebo_id);
@@ -448,5 +504,10 @@ int main(int argc, char *argv[])
     init_shaders();
     init_object_vbo();
     init_textures();
+    init_imgui();
+    ImGui_ImplGLUT_InstallFuncs();
     glutMainLoop();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGLUT_Shutdown();
+    ImGui::DestroyContext();
 }
