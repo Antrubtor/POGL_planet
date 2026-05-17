@@ -1,6 +1,7 @@
 #version 450
 
 in vec3 position;
+in float biome;
 in vec3 normalFlat;
 in vec3 normalSmooth;
 in vec3 color;
@@ -22,9 +23,11 @@ mat4 projection_matrix = mat4(
 
 out vec3 vPos;
 out vec3 localPos;
+out float vBiome;
 
 void main() {
     gl_Position = projection_matrix * model_view_matrix * vec4(position, 1.0);
     vPos = vec3(model_view_matrix * vec4(position, 1.0));
     localPos = position;
+    vBiome = biome;
 }

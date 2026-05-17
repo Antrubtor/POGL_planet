@@ -21,6 +21,7 @@ void Planet::GeneratePlanet()
             planet_vertices.push_back(v.x);
             planet_vertices.push_back(v.y);
             planet_vertices.push_back(v.z);
+            planet_vertices.push_back(v.w);
         }
 
         for (GLuint index : face.indices)

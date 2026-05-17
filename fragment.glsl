@@ -5,6 +5,7 @@ uniform sampler2D lighting_sampler;
 uniform sampler2D normalmap_sampler;
 
 in vec3 vPos;
+in float vBiome;
 layout(location=0) out vec4 output_color;
 
 uniform float minElevation;
@@ -25,18 +26,35 @@ void main() {
 
     heightPercent = clamp(heightPercent, 0.0, 1.0);
 
-    vec3 ocean = vec3(0.05, 0.2, 0.6);
-    vec3 sand  = vec3(0.8, 0.7, 0.3);
-    vec3 grass = vec3(0.2, 0.5, 0.2);
-    vec3 rock  = vec3(0.3, 0.3, 0.3);
-    vec3 snow  = vec3(0.9, 0.9, 0.9);
+    // Plaines
+    vec3 b1_ocean = vec3(0.05, 0.2, 0.6);
+    vec3 b1_sand  = vec3(0.8, 0.7, 0.3);
+    vec3 b1_grass = vec3(0.2, 0.5, 0.2);
+    vec3 b1_rock  = vec3(0.3, 0.3, 0.3);
+    vec3 b1_snow  = vec3(0.9, 0.9, 0.9);
 
-    vec3 object_color = ocean;
+    vec3 color_plains = b1_ocean;
+    color_plains = mix(color_plains, b1_sand,  smoothstep(0.0, 0.05, heightPercent));
+    color_plains = mix(color_plains, b1_grass, smoothstep(0.05, 0.15, heightPercent));
+    color_plains = mix(color_plains, b1_rock,  smoothstep(0.4, 0.6, heightPercent));
+    color_plains = mix(color_plains, b1_snow,  smoothstep(0.7, 0.85, heightPercent));
 
-    object_color = mix(object_color, sand, smoothstep(0.0, 0.05, heightPercent));
-    object_color = mix(object_color, grass, smoothstep(0.05, 0.15, heightPercent));
-    object_color = mix(object_color, rock, smoothstep(0.4, 0.6, heightPercent));
-    object_color = mix(object_color, snow, smoothstep(0.7, 0.85, heightPercent));
+    // Désert
+    vec3 b2_ocean = vec3(0.02, 0.3, 0.5); // Eau moins profonde/plus claire
+    vec3 b2_sand  = vec3(0.9, 0.8, 0.4);
+    vec3 b2_grass = vec3(0.8, 0.6, 0.3); // "Herbe" sèche ou dunes
+    vec3 b2_rock  = vec3(0.6, 0.4, 0.3); // Roche type canyon (grès)
+    vec3 b2_snow  = vec3(0.8, 0.8, 0.7); // Sommets un peu poussiéreux
+
+    vec3 color_desert = b2_ocean;
+    color_desert = mix(color_desert, b2_sand,  smoothstep(0.0, 0.05, heightPercent));
+    color_desert = mix(color_desert, b2_grass, smoothstep(0.05, 0.15, heightPercent));
+    color_desert = mix(color_desert, b2_rock,  smoothstep(0.4, 0.6, heightPercent));
+    color_desert = mix(color_desert, b2_snow,  smoothstep(0.7, 0.85, heightPercent));
+
+
+
+    vec3 object_color = mix(color_plains, color_desert, smoothstep(0.3, 0.7, vBiome));
 
     vec3 ambient_color = vec3(0.15, 0.15, 0.15);
     vec3 final_color = (ambient_color + diff) * object_color;

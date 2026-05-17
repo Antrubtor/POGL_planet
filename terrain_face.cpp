@@ -26,7 +26,9 @@ void TerrainFace::ConstructMesh()
 
             glm::vec3 pointOnPlanet =
                 shapeGenerator->CalculatePointOnPlanet(pointOnUnitSphere);
-            vertices.push_back(pointOnPlanet);
+            float biomeValue =
+                shapeGenerator->CalculateBiome(pointOnUnitSphere);
+            vertices.push_back(glm::vec4(pointOnPlanet, biomeValue));
 
             if (x != resolution - 1 && y != resolution - 1)
             {

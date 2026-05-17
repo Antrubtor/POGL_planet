@@ -14,7 +14,7 @@ public:
     glm::vec3 axisB;
     ShapeGenerator *shapeGenerator;
 
-    std::vector<glm::vec3> vertices;
+    std::vector<glm::vec4> vertices;
     std::vector<GLuint> indices;
 
     TerrainFace(int resolution, glm::vec3 localUp,

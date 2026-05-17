@@ -22,5 +22,14 @@ public:
     NoiseFilter noiseFilter;
     MinMax elevationMinMax;
 
+    FastNoiseLite biomeNoise;
+    float biomeFrequency = 0.3f;
+
+    ShapeGenerator()
+    {
+        biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    }
+
     glm::vec3 CalculatePointOnPlanet(glm::vec3 pointOnUnitSphere);
+    float CalculateBiome(glm::vec3 pointOnUnitSphere);
 };

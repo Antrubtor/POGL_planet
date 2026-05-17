@@ -68,6 +68,9 @@ void display()
     changed |= ImGui::SliderFloat("Min Value", &nf.minValue, 0.0f, 2.0f);
     changed |=
         ImGui::SliderFloat("Weight Mult", &nf.weightMultiplier, 0.0f, 3.0f);
+    changed |= ImGui::SliderFloat("Taille Biomes (Freq)",
+                                  &myPlanet.shapeGenerator.biomeFrequency,
+                                  0.01f, 8.0f);
     changed |=
         ImGui::SliderFloat3("Center (Offset)", &nf.center.x, -5.0f, 5.0f);
 
@@ -182,6 +185,7 @@ void init_object_vbo()
     planet_index_count = myPlanet.planet_indices.size();
 
     GLint vertex_location = glGetAttribLocation(program_id, "position");
+    GLint biome_location = glGetAttribLocation(program_id, "biome");
     TEST_OPENGL_ERROR();
     GLint normal_smooth_location =
         glGetAttribLocation(program_id, "normalSmooth");
@@ -212,10 +216,19 @@ void init_object_vbo()
 
     if (vertex_location != -1)
     {
-        glVertexAttribPointer(vertex_location, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glVertexAttribPointer(vertex_location, 3, GL_FLOAT, GL_FALSE,
+                              4 * sizeof(GLfloat), 0);
         TEST_OPENGL_ERROR();
         glEnableVertexAttribArray(vertex_location);
         TEST_OPENGL_ERROR();
+    }
+
+    if (biome_location != -1)
+    {
+        glVertexAttribPointer(biome_location, 1, GL_FLOAT, GL_FALSE,
+                              4 * sizeof(GLfloat),
+                              (void *)(3 * sizeof(GLfloat)));
+        glEnableVertexAttribArray(biome_location);
     }
 
     if (normal_smooth_location != -1)
