@@ -4,6 +4,13 @@
 
 #include "shape_generator.hh"
 
+struct VertexData
+{
+    glm::vec3 position;
+    float biome;
+    float unclampedRadius;
+};
+
 class TerrainFace
 {
 public:
@@ -13,7 +20,7 @@ public:
     glm::vec3 axisB;
     ShapeGenerator *shapeGenerator;
 
-    std::vector<glm::vec4> vertices;
+    std::vector<VertexData> vertices;
     std::vector<GLuint> indices;
 
     TerrainFace(int resolution, glm::vec3 localUp,

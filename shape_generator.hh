@@ -13,6 +13,18 @@ public:
         if (v > Max)
             Max = v;
     }
+
+    void Reset()
+    {
+        Min = std::numeric_limits<float>::max();
+        Max = std::numeric_limits<float>::lowest();
+    }
+};
+
+struct PointData
+{
+    glm::vec3 position;
+    float unclampedRadius;
 };
 
 class ShapeGenerator
@@ -30,6 +42,6 @@ public:
         biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
     }
 
-    glm::vec3 CalculatePointOnPlanet(glm::vec3 pointOnUnitSphere);
+    PointData CalculatePointOnPlanet(glm::vec3 pointOnUnitSphere);
     float CalculateBiome(glm::vec3 pointOnUnitSphere);
 };

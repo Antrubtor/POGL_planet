@@ -1,11 +1,12 @@
 #include "shape_generator.hh"
 
-glm::vec3 ShapeGenerator::CalculatePointOnPlanet(glm::vec3 pointOnUnitSphere)
+PointData ShapeGenerator::CalculatePointOnPlanet(glm::vec3 pointOnUnitSphere)
 {
     float elevation = noiseFilter.Evaluate(pointOnUnitSphere);
-    float currentRadius = planetRadius * (1.0f + elevation);
-    elevationMinMax.AddValue(currentRadius);
-    return pointOnUnitSphere * currentRadius;
+    float unclampedRadius = planetRadius * (1.0f + elevation);
+    float clampedRadius = planetRadius * (1.0f + std::max(0.0f, elevation));
+    elevationMinMax.AddValue(unclampedRadius);
+    return { pointOnUnitSphere * clampedRadius, unclampedRadius };
 }
 
 float ShapeGenerator::CalculateBiome(glm::vec3 pointOnUnitSphere)

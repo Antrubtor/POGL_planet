@@ -25,9 +25,13 @@ out vec3 vPos;
 out vec3 localPos;
 out float vBiome;
 
+in float unclampedRadius;
+out float vUnclampedRadius;
+
 void main() {
     gl_Position = projection_matrix * model_view_matrix * vec4(position, 1.0);
     vPos = vec3(model_view_matrix * vec4(position, 1.0));
     localPos = position;
     vBiome = biome;
+    vUnclampedRadius = unclampedRadius;
 }

@@ -4,6 +4,7 @@ void Planet::GeneratePlanet()
 {
     planet_vertices.clear();
     planet_indices.clear();
+    shapeGenerator.elevationMinMax.Reset();
 
     glm::vec3 directions[6] = { glm::vec3(0, 1, 0),  glm::vec3(0, -1, 0),
                                 glm::vec3(-1, 0, 0), glm::vec3(1, 0, 0),
@@ -18,10 +19,11 @@ void Planet::GeneratePlanet()
 
         for (const auto &v : face.vertices)
         {
-            planet_vertices.push_back(v.x);
-            planet_vertices.push_back(v.y);
-            planet_vertices.push_back(v.z);
-            planet_vertices.push_back(v.w);
+            planet_vertices.push_back(v.position.x);
+            planet_vertices.push_back(v.position.y);
+            planet_vertices.push_back(v.position.z);
+            planet_vertices.push_back(v.biome);
+            planet_vertices.push_back(v.unclampedRadius);
         }
 
         for (GLuint index : face.indices)

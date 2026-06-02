@@ -92,8 +92,11 @@ void display()
 
         GLint min_loc = glGetUniformLocation(program_id, "minElevation");
         GLint max_loc = glGetUniformLocation(program_id, "maxElevation");
+        GLint radius_loc = glGetUniformLocation(program_id, "planetRadius");
+
         glUniform1f(min_loc, myPlanet.shapeGenerator.elevationMinMax.Min);
         glUniform1f(max_loc, myPlanet.shapeGenerator.elevationMinMax.Max);
+        glUniform1f(radius_loc, myPlanet.shapeGenerator.planetRadius);
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -184,6 +187,8 @@ void init_object_vbo()
     myPlanet.GeneratePlanet();
     planet_index_count = myPlanet.planet_indices.size();
 
+    GLint unclamped_radius_location =
+        glGetAttribLocation(program_id, "unclampedRadius");
     GLint vertex_location = glGetAttribLocation(program_id, "position");
     GLint biome_location = glGetAttribLocation(program_id, "biome");
     TEST_OPENGL_ERROR();
@@ -217,7 +222,7 @@ void init_object_vbo()
     if (vertex_location != -1)
     {
         glVertexAttribPointer(vertex_location, 3, GL_FLOAT, GL_FALSE,
-                              4 * sizeof(GLfloat), 0);
+                              5 * sizeof(GLfloat), 0);
         TEST_OPENGL_ERROR();
         glEnableVertexAttribArray(vertex_location);
         TEST_OPENGL_ERROR();
@@ -226,9 +231,17 @@ void init_object_vbo()
     if (biome_location != -1)
     {
         glVertexAttribPointer(biome_location, 1, GL_FLOAT, GL_FALSE,
-                              4 * sizeof(GLfloat),
+                              5 * sizeof(GLfloat),
                               (void *)(3 * sizeof(GLfloat)));
         glEnableVertexAttribArray(biome_location);
+    }
+
+    if (unclamped_radius_location != -1)
+    {
+        glVertexAttribPointer(unclamped_radius_location, 1, GL_FLOAT, GL_FALSE,
+                              5 * sizeof(GLfloat),
+                              (void *)(4 * sizeof(GLfloat)));
+        glEnableVertexAttribArray(unclamped_radius_location);
     }
 
     if (normal_smooth_location != -1)
@@ -249,9 +262,11 @@ void init_object_vbo()
 
     GLint min_loc = glGetUniformLocation(program_id, "minElevation");
     GLint max_loc = glGetUniformLocation(program_id, "maxElevation");
+    GLint radius_loc = glGetUniformLocation(program_id, "planetRadius");
 
     glUniform1f(min_loc, myPlanet.shapeGenerator.elevationMinMax.Min);
     glUniform1f(max_loc, myPlanet.shapeGenerator.elevationMinMax.Max);
+    glUniform1f(radius_loc, myPlanet.shapeGenerator.planetRadius);
     glBindVertexArray(0);
 }
 

@@ -28,6 +28,6 @@ float NoiseFilter::Evaluate(glm::vec3 point)
         amplitude *= persistence;
     }
 
-    noiseValue = std::max(0.0f, noiseValue - minValue);
+    noiseValue = noiseValue - minValue;
     return noiseValue * strength;
 }
