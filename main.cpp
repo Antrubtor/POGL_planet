@@ -6,7 +6,6 @@
 /************************************************************************/
 
 #include <GL/glew.h>
-#include <GL/freeglut.h>
 #include <fstream>
 #include <glm/glm.hpp>
 #include <iostream>
@@ -14,6 +13,7 @@
 
 // #include <glt_transform.hh>
 
+#include "GL/freeglut.h"
 #include "image.hh"
 #include "image_io.hh"
 #include "imgui/imgui.h"

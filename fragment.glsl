@@ -40,11 +40,11 @@ void main() {
     color_plains = mix(color_plains, b1_snow,  smoothstep(0.7, 0.85, heightPercent));
 
     // Désert
-    vec3 b2_ocean = vec3(0.02, 0.3, 0.5); // Eau moins profonde/plus claire
+    vec3 b2_ocean = vec3(0.02, 0.3, 0.5);
     vec3 b2_sand  = vec3(0.9, 0.8, 0.4);
-    vec3 b2_grass = vec3(0.8, 0.6, 0.3); // "Herbe" sèche ou dunes
-    vec3 b2_rock  = vec3(0.6, 0.4, 0.3); // Roche type canyon (grès)
-    vec3 b2_snow  = vec3(0.8, 0.8, 0.7); // Sommets un peu poussiéreux
+    vec3 b2_grass = vec3(0.8, 0.6, 0.3);
+    vec3 b2_rock  = vec3(0.6, 0.4, 0.3);
+    vec3 b2_snow  = vec3(0.8, 0.8, 0.7);
 
     vec3 color_desert = b2_ocean;
     color_desert = mix(color_desert, b2_sand,  smoothstep(0.0, 0.05, heightPercent));
