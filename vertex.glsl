@@ -2,36 +2,35 @@
 
 in vec3 position;
 in float biome;
-in vec3 normalFlat;
-in vec3 normalSmooth;
-in vec3 color;
-in vec2 uv;
+in float unclampedRadius;
 
-vec3 light_color = vec3(1.0, 1.0, 1.0);
-vec3 light_position = vec3(1.0, 1.0, 5.0);
-
-mat4 model_view_matrix = mat4(
-			      0.57735, -0.33333, 0.57735, 0.00000,
-			      0.00000, 0.66667, 0.57735, 0.00000,
-			      -0.57735, -0.33333, 0.57735, 0.00000,
-			      0.00000, 0.00000, -17, 1.00000);
-mat4 projection_matrix = mat4(
-			      5.00000, 0.00000, 0.00000, 0.00000,
-			      0.00000, 5.00000, 0.00000, 0.00000,
-			      0.00000, 0.00000, -1.00020, -1.00000,
-			      0.00000, 0.00000, -10.00100, 0.00000);
+uniform mat4 model_matrix;
+uniform mat4 model_view_matrix;
+uniform mat4 projection_matrix;
+uniform float planetRadius;
+uniform float u_time;
 
 out vec3 vPos;
+out vec3 vWorldPos;
 out vec3 localPos;
 out float vBiome;
-
-in float unclampedRadius;
 out float vUnclampedRadius;
 
-void main() {
-    gl_Position = projection_matrix * model_view_matrix * vec4(position, 1.0);
-    vPos = vec3(model_view_matrix * vec4(position, 1.0));
-    localPos = position;
+void main()
+{
+    vec3 pos = position;
+    vec3 normal = normalize(pos);
+
+    float wave = sin(dot(normal, vec3(1.0, 0.5, 0.8)) * 8.0 + u_time * 2.0)
+            + sin(dot(normal, vec3(-0.5, 1.0, 0.3)) * 5.0 + u_time * 1.5);
+
+    float waveOffset = (unclampedRadius < planetRadius) ? wave * 0.015 : 0.0;
+    pos += normal * waveOffset;
+
+    gl_Position = projection_matrix * model_view_matrix * vec4(pos, 1.0);
+    vPos = vec3(model_view_matrix * vec4(pos, 1.0));
+    vWorldPos = vec3(model_matrix * vec4(pos, 1.0));
+    localPos = pos;
     vBiome = biome;
     vUnclampedRadius = unclampedRadius;
 }
