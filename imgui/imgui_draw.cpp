@@ -192,9 +192,9 @@ namespace IMGUI_STB_NAMESPACE
                                         // local declaration
 #        pragma warning(disable : 6011) // (stb_rectpack) Dereferencing NULL
                                         // pointer 'cur->next'.
-#        pragma warning(                                                       \
-            disable : 5262) // (stb_truetype) implicit fall-through occurs
-                            // here; are you missing a break statement?
+#        pragma warning(disable                                                \
+                        : 5262) // (stb_truetype) implicit fall-through occurs
+                                // here; are you missing a break statement?
 #        pragma warning(disable : 6385) // (stb_truetype) Reading invalid data
                                         // from 'buffer':  the readable size is
                                         // '_Old_3`kernel_width' bytes, but '3'
@@ -570,7 +570,7 @@ void ImDrawListSharedData::SetCircleTessellationMaxError(float max_error)
         const float radius = (float)i;
         CircleSegmentCounts[i] =
             (ImU8)((i > 0) ? IM_DRAWLIST_CIRCLE_AUTO_SEGMENT_CALC(
-                       radius, CircleSegmentMaxError)
+                                 radius, CircleSegmentMaxError)
                            : IM_DRAWLIST_ARCFAST_SAMPLE_MAX);
     }
     ArcFastRadiusCutoff = IM_DRAWLIST_CIRCLE_AUTO_SEGMENT_CALC_R(
@@ -3472,8 +3472,8 @@ static const ImVec2
           ImVec2(6, 7) }, // ImGuiMouseCursor_NotAllowed
     };
 
-#    define IM_FONTGLYPH_INDEX_UNUSED ((ImU16)-1) // 0xFFFF
-#    define IM_FONTGLYPH_INDEX_NOT_FOUND ((ImU16)-2) // 0xFFFE
+#    define IM_FONTGLYPH_INDEX_UNUSED ((ImU16) - 1) // 0xFFFF
+#    define IM_FONTGLYPH_INDEX_NOT_FOUND ((ImU16) - 2) // 0xFFFE
 
 ImFontAtlas::ImFontAtlas()
 {
@@ -4045,7 +4045,8 @@ ImFont *ImFontAtlas::AddFont(const ImFontConfig *font_cfg_in)
         int size = 0;
         for (const ImWchar *p = font_cfg->GlyphExcludeRanges; p[0] != 0;
              p++, size++)
-        {}
+        {
+        }
         IM_ASSERT((size & 1) == 0
                   && "GlyphExcludeRanges[] size must be multiple of two!");
         IM_ASSERT((size <= 64) && "GlyphExcludeRanges[] size must be small!");
@@ -4251,7 +4252,8 @@ ImFont *ImFontAtlas::AddFontFromFileTTF(const char *filename, float size_pixels,
         const char *p;
         for (p = filename + ImStrlen(filename);
              p > filename && p[-1] != '/' && p[-1] != '\\'; p--)
-        {}
+        {
+        }
         ImFormatString(font_cfg.Name, IM_COUNTOF(font_cfg.Name), "%s", p);
     }
     return AddFontFromMemoryTTF(data, (int)data_size, size_pixels, &font_cfg,
@@ -7209,7 +7211,7 @@ void ImTextClassifierSetCharClassFromStr(ImU32 *bits,
 }
 
 #    define ImTextClassifierGet(_BITS, _CHAR_OFFSET)                           \
-        ((_BITS[(_CHAR_OFFSET) >> 4] >> (((_CHAR_OFFSET)&15) << 1)) & 0x03)
+        ((_BITS[(_CHAR_OFFSET) >> 4] >> (((_CHAR_OFFSET) & 15) << 1)) & 0x03)
 
 // 2-bit per character
 static ImU32 g_CharClassifierIsSeparator_0000_007f[128 / 16] = {};

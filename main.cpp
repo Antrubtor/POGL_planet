@@ -8,6 +8,8 @@
 #include <GL/glew.h>
 #include <fstream>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <vector>
 
@@ -18,9 +20,6 @@
 #include "imgui/imgui_impl_glut.h"
 #include "imgui/imgui_impl_opengl3.h"
 #include "planet.hh"
-
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #define TEST_OPENGL_ERROR()                                                    \
     do                                                                         \
@@ -38,7 +37,8 @@ GLsizei planet_index_count = 0;
 Planet myPlanet;
 
 std::vector<Planet> planets;
-struct PlanetInstance {
+struct PlanetInstance
+{
     GLuint vao_id;
     GLuint vbo_id;
     GLuint ebo_id;
@@ -60,12 +60,17 @@ float mouseSensitivity = 0.1f;
 
 float g_time = 0.0f;
 
+int g_window_width = 1024;
+int g_window_height = 1024;
+
 GLuint sky_program_id;
 GLuint sky_vao_id;
 GLuint sky_vbo_id;
 
 void window_resize(int width, int height)
 {
+    g_window_width = width;
+    g_window_height = height;
     glViewport(0, 0, width, height);
     TEST_OPENGL_ERROR();
 }
@@ -78,56 +83,79 @@ void keyboard(unsigned char key, int x, int y)
 {
     ImGui_ImplGLUT_KeyboardFunc(key, x, y);
 
-    ImGuiIO& io = ImGui::GetIO();
-    if (io.WantCaptureKeyboard) return;
+    ImGuiIO &io = ImGui::GetIO();
+    if (io.WantCaptureKeyboard)
+        return;
 
     glm::vec3 right = glm::normalize(glm::cross(cameraFront, cameraUp));
 
-    switch (key) {
-        case 'w': cameraPos += cameraSpeed * cameraFront; break;
-        case 's': cameraPos -= cameraSpeed * cameraFront; break;
-        case 'a': cameraPos -= cameraSpeed * right; break;
-        case 'd': cameraPos += cameraSpeed * right; break;
-        case 'e': cameraPos += cameraSpeed * cameraUp; break;
-        case 'q': cameraPos -= cameraSpeed * cameraUp; break;
+    switch (key)
+    {
+    case 'w':
+        cameraPos += cameraSpeed * cameraFront;
+        break;
+    case 's':
+        cameraPos -= cameraSpeed * cameraFront;
+        break;
+    case 'a':
+        cameraPos -= cameraSpeed * right;
+        break;
+    case 'd':
+        cameraPos += cameraSpeed * right;
+        break;
+    case 'e':
+        cameraPos += cameraSpeed * cameraUp;
+        break;
+    case 'q':
+        cameraPos -= cameraSpeed * cameraUp;
+        break;
     }
     glutPostRedisplay();
 }
 
 void update_camera()
 {
-    glm::mat4 view=glm::lookAt(cameraPos, cameraPos+cameraFront, cameraUp);
-    glm::mat4 proj=glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 1000.0f);
+    glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    float aspect = (g_window_height > 0)
+        ? (float)g_window_width / (float)g_window_height
+        : 1.0f;
+    glm::mat4 proj =
+        glm::perspective(glm::radians(45.0f), aspect, 0.1f, 1000.0f);
 
-    GLint mv_loc=glGetUniformLocation(program_id, "model_view_matrix");
-    GLint pr_loc=glGetUniformLocation(program_id, "projection_matrix");
-    GLint time_loc=glGetUniformLocation(program_id, "u_time");
-    GLint cam_loc=glGetUniformLocation(program_id, "u_cameraPos");
+    GLint mv_loc = glGetUniformLocation(program_id, "model_view_matrix");
+    GLint pr_loc = glGetUniformLocation(program_id, "projection_matrix");
+    GLint time_loc = glGetUniformLocation(program_id, "u_time");
+    GLint cam_loc = glGetUniformLocation(program_id, "u_cameraPos");
 
     glUniformMatrix4fv(mv_loc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(pr_loc, 1, GL_FALSE, glm::value_ptr(proj));
     glUniform1f(time_loc, g_time);
     glUniform3fv(cam_loc, 1, glm::value_ptr(cameraPos));
 
-    for (int i=1; i<(int)planets.size(); i++)
+    for (int i = 1; i < (int)planets.size(); i++)
     {
-        std::string pos_name="u_reflPlanets["+std::to_string(i-1)+"].center";
-        std::string rad_name="u_reflPlanets["+std::to_string(i-1)+"].radius";
-        GLint ploc=glGetUniformLocation(program_id, pos_name.c_str());
-        GLint rloc=glGetUniformLocation(program_id, rad_name.c_str());
+        std::string pos_name =
+            "u_reflPlanets[" + std::to_string(i - 1) + "].center";
+        std::string rad_name =
+            "u_reflPlanets[" + std::to_string(i - 1) + "].radius";
+        GLint ploc = glGetUniformLocation(program_id, pos_name.c_str());
+        GLint rloc = glGetUniformLocation(program_id, rad_name.c_str());
         glUniform3fv(ploc, 1, glm::value_ptr(planets[i].position));
         glUniform1f(rloc, planets[i].shapeGenerator.planetRadius);
     }
 }
 
-void mousemotion(int x, int y) {
-    ImGuiIO& io = ImGui::GetIO();
+void mousemotion(int x, int y)
+{
+    ImGuiIO &io = ImGui::GetIO();
     ImGui_ImplGLUT_MotionFunc(x, y);
-    if (io.WantCaptureMouse) {
+    if (io.WantCaptureMouse)
+    {
         firstMouse = true;
         return;
     }
-    if (firstMouse) {
+    if (firstMouse)
+    {
         lastMouseX = x;
         lastMouseY = y;
         firstMouse = false;
@@ -139,8 +167,10 @@ void mousemotion(int x, int y) {
     lastMouseY = y;
     yaw += offsetX;
     pitch += offsetY;
-    if (pitch > 89.0f) pitch = 89.0f;
-    if (pitch < -89.0f) pitch = -89.0f;
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
     glm::vec3 front;
     front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     front.y = sin(glm::radians(pitch));
@@ -153,8 +183,9 @@ void mouse_button(int button, int state, int x, int y)
 {
     ImGui_ImplGLUT_MouseFunc(button, state, x, y);
 
-    ImGuiIO& io = ImGui::GetIO();
-    if (io.WantCaptureMouse) return;
+    ImGuiIO &io = ImGui::GetIO();
+    if (io.WantCaptureMouse)
+        return;
 
     if (button == GLUT_LEFT_BUTTON)
     {
@@ -179,7 +210,7 @@ void display()
 
     ImGui::Begin("Parametres de Generation");
     bool changed = false;
-    NoiseFilter &nf=planets[0].shapeGenerator.noiseFilter;
+    NoiseFilter &nf = planets[0].shapeGenerator.noiseFilter;
     changed |= ImGui::SliderFloat("Strength", &nf.strength, 0.0f, 2.0f);
     changed |= ImGui::SliderInt("Num Layers", &nf.numLayers, 1, 10);
     changed |=
@@ -201,7 +232,8 @@ void display()
         for (int i = 0; i < (int)planets.size() - 1; i++)
         {
             planets[i].shapeGenerator.noiseFilter = nf;
-            planets[i].shapeGenerator.biomeFrequency = planets[0].shapeGenerator.biomeFrequency;
+            planets[i].shapeGenerator.biomeFrequency =
+                planets[0].shapeGenerator.biomeFrequency;
             planets[i].GeneratePlanet();
             planetInstances[i].index_count = planets[i].planet_indices.size();
 
@@ -226,7 +258,11 @@ void display()
         glUniform1f(radius_loc, planets[0].shapeGenerator.planetRadius);
     }
 
-    g_time += 0.016f;
+    g_time += 0.006f;
+
+    g_window_width = glutGet(GLUT_WINDOW_WIDTH);
+    g_window_height = glutGet(GLUT_WINDOW_HEIGHT);
+    glViewport(0, 0, g_window_width, g_window_height);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     TEST_OPENGL_ERROR();
@@ -235,7 +271,11 @@ void display()
     glUseProgram(sky_program_id);
 
     glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-    glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 1000.0f);
+    float aspect = (g_window_height > 0)
+        ? (float)g_window_width / (float)g_window_height
+        : 1.0f;
+    glm::mat4 proj =
+        glm::perspective(glm::radians(45.0f), aspect, 0.1f, 1000.0f);
     glm::mat4 inv_vp = glm::inverse(proj * view);
 
     GLint ivp_loc = glGetUniformLocation(sky_program_id, "inv_view_proj");
@@ -250,15 +290,20 @@ void display()
 
     glUseProgram(program_id);
 
-    GLint cam_loc  = glGetUniformLocation(program_id, "u_cameraPos");
+    GLint cam_loc = glGetUniformLocation(program_id, "u_cameraPos");
     GLint time_loc2 = glGetUniformLocation(program_id, "u_time");
-    glUniform3fv(cam_loc,   1, glm::value_ptr(cameraPos));
+    glUniform3fv(cam_loc, 1, glm::value_ptr(cameraPos));
     glUniform1f(time_loc2, g_time);
 
     for (int i = 0; i < (int)planets.size(); i++)
     {
-        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 1000.0f);
+        glm::mat4 view =
+            glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        float aspect = (g_window_height > 0)
+            ? (float)g_window_width / (float)g_window_height
+            : 1.0f;
+        glm::mat4 proj =
+            glm::perspective(glm::radians(45.0f), aspect, 0.1f, 1000.0f);
         glm::mat4 model = glm::translate(glm::mat4(1.0f), planets[i].position);
         glm::mat4 mv = view * model;
 
@@ -279,9 +324,12 @@ void display()
         int reflIdx = 0;
         for (int j = 0; j < (int)planets.size(); j++)
         {
-            if (j == i) continue;
-            std::string pc = "u_reflPlanets[" + std::to_string(reflIdx) + "].center";
-            std::string pr = "u_reflPlanets[" + std::to_string(reflIdx) + "].radius";
+            if (j == i)
+                continue;
+            std::string pc =
+                "u_reflPlanets[" + std::to_string(reflIdx) + "].center";
+            std::string pr =
+                "u_reflPlanets[" + std::to_string(reflIdx) + "].radius";
             GLint ploc = glGetUniformLocation(program_id, pc.c_str());
             GLint rloc = glGetUniformLocation(program_id, pr.c_str());
             glUniform3fv(ploc, 1, glm::value_ptr(planets[j].position));
@@ -294,25 +342,32 @@ void display()
         int tmpIdx2 = 0;
         for (int j = 0; j < (int)planets.size(); j++)
         {
-            if (j == i) continue;
-            if (j == sunPlanetGlobalIdx) { sunReflIdx = tmpIdx2; break; }
+            if (j == i)
+                continue;
+            if (j == sunPlanetGlobalIdx)
+            {
+                sunReflIdx = tmpIdx2;
+                break;
+            }
             tmpIdx2++;
         }
         GLint sunrefl_loc = glGetUniformLocation(program_id, "u_reflSunIndex");
         glUniform1i(sunrefl_loc, sunReflIdx);
 
         GLint nrefl_loc = glGetUniformLocation(program_id, "u_numReflPlanets");
-        GLint cc_loc = glGetUniformLocation(program_id, "u_currentPlanetCenter");
-        GLint cr_loc = glGetUniformLocation(program_id, "u_currentPlanetRadiusMax");
+        GLint cc_loc =
+            glGetUniformLocation(program_id, "u_currentPlanetCenter");
+        GLint cr_loc =
+            glGetUniformLocation(program_id, "u_currentPlanetRadiusMax");
         GLint sun_loc = glGetUniformLocation(program_id, "u_isSun");
         glUniform1i(sun_loc, (i == (int)planets.size() - 1) ? 1 : 0);
         glUniform3fv(cc_loc, 1, glm::value_ptr(planets[i].position));
-        glUniform1f(cr_loc,  planets[i].shapeGenerator.elevationMinMax.Max);
+        glUniform1f(cr_loc, planets[i].shapeGenerator.elevationMinMax.Max);
         glUniform1i(nrefl_loc, reflIdx);
 
         glBindVertexArray(planetInstances[i].vao_id);
         glDrawElements(GL_TRIANGLES, planetInstances[i].index_count,
-                       GL_UNSIGNED_INT, (void*)0);
+                       GL_UNSIGNED_INT, (void *)0);
         glBindVertexArray(0);
     }
 
@@ -384,14 +439,14 @@ void init_imgui()
     ImGui_ImplOpenGL3_Init("#version 450");
 }
 
-void init_planet_instance(Planet& planet, PlanetInstance& inst)
+void init_planet_instance(Planet &planet, PlanetInstance &inst)
 {
     planet.GeneratePlanet();
-    inst.index_count=planet.planet_indices.size();
+    inst.index_count = planet.planet_indices.size();
 
-    GLint pos_loc=glGetAttribLocation(program_id, "position");
-    GLint biome_loc=glGetAttribLocation(program_id, "biome");
-    GLint unclamped_loc=glGetAttribLocation(program_id, "unclampedRadius");
+    GLint pos_loc = glGetAttribLocation(program_id, "position");
+    GLint biome_loc = glGetAttribLocation(program_id, "biome");
+    GLint unclamped_loc = glGetAttribLocation(program_id, "unclampedRadius");
 
     glGenVertexArrays(1, &inst.vao_id);
     glBindVertexArray(inst.vao_id);
@@ -399,32 +454,34 @@ void init_planet_instance(Planet& planet, PlanetInstance& inst)
     glGenBuffers(1, &inst.vbo_id);
     glBindBuffer(GL_ARRAY_BUFFER, inst.vbo_id);
     glBufferData(GL_ARRAY_BUFFER,
-                 planet.planet_vertices.size()*sizeof(GLfloat),
+                 planet.planet_vertices.size() * sizeof(GLfloat),
                  planet.planet_vertices.data(), GL_STATIC_DRAW);
 
     if (pos_loc != -1)
     {
         glVertexAttribPointer(pos_loc, 3, GL_FLOAT, GL_FALSE,
-                              5*sizeof(GLfloat), 0);
+                              5 * sizeof(GLfloat), 0);
         glEnableVertexAttribArray(pos_loc);
     }
     if (biome_loc != -1)
     {
         glVertexAttribPointer(biome_loc, 1, GL_FLOAT, GL_FALSE,
-                              5*sizeof(GLfloat), (void*)(3*sizeof(GLfloat)));
+                              5 * sizeof(GLfloat),
+                              (void *)(3 * sizeof(GLfloat)));
         glEnableVertexAttribArray(biome_loc);
     }
     if (unclamped_loc != -1)
     {
         glVertexAttribPointer(unclamped_loc, 1, GL_FLOAT, GL_FALSE,
-                              5*sizeof(GLfloat), (void*)(4*sizeof(GLfloat)));
+                              5 * sizeof(GLfloat),
+                              (void *)(4 * sizeof(GLfloat)));
         glEnableVertexAttribArray(unclamped_loc);
     }
 
     glGenBuffers(1, &inst.ebo_id);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, inst.ebo_id);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 planet.planet_indices.size()*sizeof(GLuint),
+                 planet.planet_indices.size() * sizeof(GLuint),
                  planet.planet_indices.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(0);
@@ -455,13 +512,12 @@ void init_object_vbo()
     sun.shapeGenerator.noiseFilter.minValue = 999.0f;
     planets.push_back(sun);
 
-    for (auto& p : planets)
+    for (auto &p : planets)
     {
         PlanetInstance inst;
         init_planet_instance(p, inst);
         planetInstances.push_back(inst);
     }
-
 
     glUseProgram(program_id);
     GLint min_loc = glGetUniformLocation(program_id, "minElevation");
@@ -616,8 +672,7 @@ bool load_and_compile_shader(const GLenum shader_type,
         GLint log_size;
         char *shader_log;
         glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &log_size);
-        shader_log = (char *)std::malloc(
-            log_size + 1);
+        shader_log = (char *)std::malloc(log_size + 1);
         if (shader_log != 0)
         {
             glGetShaderInfoLog(shader_id, log_size, &log_size, shader_log);
@@ -652,8 +707,7 @@ bool attach_and_link_program(const std::vector<GLuint> &shaders_id,
         GLint log_size;
         char *program_log;
         glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &log_size);
-        program_log = (char *)std::malloc(
-            log_size + 1);
+        program_log = (char *)std::malloc(log_size + 1);
         if (program_log != 0)
         {
             glGetProgramInfoLog(program_id, log_size, &log_size, program_log);
@@ -718,19 +772,27 @@ bool init_shaders()
 bool init_sky_shader()
 {
     GLuint vert_id, frag_id;
-    if (!load_and_compile_shader(GL_VERTEX_SHADER,   "sky_vertex.glsl",   vert_id)) return false;
-    if (!load_and_compile_shader(GL_FRAGMENT_SHADER, "sky_fragment.glsl", frag_id)) return false;
+    if (!load_and_compile_shader(GL_VERTEX_SHADER, "sky_vertex.glsl", vert_id))
+        return false;
+    if (!load_and_compile_shader(GL_FRAGMENT_SHADER, "sky_fragment.glsl",
+                                 frag_id))
+        return false;
 
     std::vector<GLuint> ids = { vert_id, frag_id };
-    if (!attach_and_link_program(ids, sky_program_id)) return false;
+    if (!attach_and_link_program(ids, sky_program_id))
+        return false;
 
-    for (auto id : ids) { glDetachShader(sky_program_id, id); glDeleteShader(id); }
+    for (auto id : ids)
+    {
+        glDetachShader(sky_program_id, id);
+        glDeleteShader(id);
+    }
     return true;
 }
 
 void init_sky_vao()
 {
-    float verts[] = { -1,-1,  1,-1,  1,1,  -1,-1,  1,1,  -1,1 };
+    float verts[] = { -1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1 };
 
     glGenVertexArrays(1, &sky_vao_id);
     glBindVertexArray(sky_vao_id);

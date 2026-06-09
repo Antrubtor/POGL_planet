@@ -4414,7 +4414,7 @@ static inline int ImTextCharToUtf8_inline(char *buf, int buf_size,
             return 0;
         buf[0] = (char)(0xe0 + (c >> 12));
         buf[1] = (char)(0x80 + ((c >> 6) & 0x3f));
-        buf[2] = (char)(0x80 + ((c)&0x3f));
+        buf[2] = (char)(0x80 + ((c) & 0x3f));
         return 3;
     }
     if (c <= 0x10FFFF)
@@ -4424,7 +4424,7 @@ static inline int ImTextCharToUtf8_inline(char *buf, int buf_size,
         buf[0] = (char)(0xf0 + (c >> 18));
         buf[1] = (char)(0x80 + ((c >> 12) & 0x3f));
         buf[2] = (char)(0x80 + ((c >> 6) & 0x3f));
-        buf[3] = (char)(0x80 + ((c)&0x3f));
+        buf[3] = (char)(0x80 + ((c) & 0x3f));
         return 4;
     }
     // Invalid code point, the max unicode is 0x10FFFF
@@ -6635,11 +6635,11 @@ void ImGui::Initialize()
 #    ifdef IMGUI_HAS_DOCK
 #    endif
 
-            // Print a debug message when running with debug feature
-            // IMGUI_DEBUG_HIGHLIGHT_ALL_ID_CONFLICTS because it is very slow.
-            // DO NOT COMMENT OUT THIS MESSAGE. IT IS DESIGNED TO REMIND YOU
-            // THAT IMGUI_DEBUG_HIGHLIGHT_ALL_ID_CONFLICTS SHOULD ONLY BE
-            // TEMPORARILY ENABLED.
+    // Print a debug message when running with debug feature
+    // IMGUI_DEBUG_HIGHLIGHT_ALL_ID_CONFLICTS because it is very slow.
+    // DO NOT COMMENT OUT THIS MESSAGE. IT IS DESIGNED TO REMIND YOU
+    // THAT IMGUI_DEBUG_HIGHLIGHT_ALL_ID_CONFLICTS SHOULD ONLY BE
+    // TEMPORARILY ENABLED.
 #    ifdef IMGUI_DEBUG_HIGHLIGHT_ALL_ID_CONFLICTS
     DebugLog("IMGUI_DEBUG_HIGHLIGHT_ALL_ID_CONFLICTS is enabled.\nMust disable "
              "after use! Otherwise Dear ImGui will run slower.\n");
@@ -11591,7 +11591,7 @@ bool ImGui::Begin(const char *name, bool *p_open, ImGuiWindowFlags flags)
             DebugLocateItemResolveWithLastItem();
 #    endif
 
-            // [Test Engine] Register title bar / tab with MoveId.
+        // [Test Engine] Register title bar / tab with MoveId.
 #    ifdef IMGUI_ENABLE_TEST_ENGINE
         if (!(window->Flags & ImGuiWindowFlags_NoTitleBar))
         {
@@ -12750,7 +12750,7 @@ void ImGui::UpdateCurrentFontSize(float restore_font_size_after_scaling)
         if (window != NULL)
             final_size *= window->FontWindowScale;
 
-            // Legacy scale factors
+        // Legacy scale factors
 #    ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
         final_size *= g.IO.FontGlobalScale; // Use style.FontScaleMain instead!
         if (g.Font != NULL)
@@ -14756,7 +14756,7 @@ void ImGui::UpdateInputEvents(bool trickle_fast_inputs)
     for (int n = 0; n < event_n; n++)
         g.InputEventsTrail.push_back(g.InputEventsQueue[n]);
 
-        // [DEBUG]
+    // [DEBUG]
 #    ifndef IMGUI_DISABLE_DEBUG_TOOLS
     if (event_n != 0 && (g.DebugLogFlags & ImGuiDebugLogFlags_EventIO))
         for (int n = 0; n < g.InputEventsQueue.Size; n++)
@@ -15209,10 +15209,10 @@ static void ImGui::ErrorCheckNewFrameSanityChecks()
     else
         IM_ASSERT(0);
 
-        // Emscripten backends are often imprecise in their submission of
-        // DeltaTime.
-        // (#6114, #3644) Ideally the Emscripten app/backend should aim to fix
-        // or smooth this value and avoid feeding zero, but we tolerate it.
+    // Emscripten backends are often imprecise in their submission of
+    // DeltaTime.
+    // (#6114, #3644) Ideally the Emscripten app/backend should aim to fix
+    // or smooth this value and avoid feeding zero, but we tolerate it.
 #    ifdef __EMSCRIPTEN__
     if (g.IO.DeltaTime <= 0.0f && g.FrameCount > 0)
         g.IO.DeltaTime = 0.00001f;
@@ -15734,7 +15734,7 @@ bool ImGui::ItemAdd(const ImRect &bb, ImGuiID id, const ImRect *nav_bb_arg,
             if (!g.ItemUnclipByLog)
                 return false;
 
-                // [DEBUG]
+    // [DEBUG]
 #    ifndef IMGUI_DISABLE_DEBUG_TOOLS
     if (id != 0)
     {
@@ -19280,8 +19280,8 @@ void ImGui::NavUpdateCreateMoveRequest()
     if (window && g.NavMoveDir == ImGuiDir_None && nav_keyboard_active)
         scoring_page_offset_y = NavUpdatePageUpPageDown();
 
-        // [DEBUG] Always send a request when holding Ctrl. Hold Ctrl + Arrow
-        // change the direction.
+    // [DEBUG] Always send a request when holding Ctrl. Hold Ctrl + Arrow
+    // change the direction.
 #    if IMGUI_DEBUG_NAV_SCORING
     // if (io.KeyCtrl && IsKeyPressed(ImGuiKey_C))
     //     g.NavMoveDirForDebug = (ImGuiDir)((g.NavMoveDirForDebug + 1) & 3);
@@ -23406,7 +23406,8 @@ void ImGui::ShowMetricsWindow(bool *p_open)
 #        ifdef IMGUI_HAS_DOCK
     // Overlay: Display Docking info
     if (show_docking_nodes && g.IO.KeyCtrl)
-    {}
+    {
+    }
 #        endif // #ifdef IMGUI_HAS_DOCK
 
     End();
@@ -23762,7 +23763,7 @@ void ImGui::DebugNodeFont(ImFont *font)
     if (SmallButton("Clear unused"))
         ImFontAtlasFontDiscardBakes(atlas, font, 2);
 
-        // Display details
+    // Display details
 #        ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
     SetNextItemWidth(GetFontSize() * 8);
     DragFloat("Font scale", &font->Scale, 0.005f, 0.3f, 2.0f, "%.1f");

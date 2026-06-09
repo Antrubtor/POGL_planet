@@ -9573,8 +9573,8 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags,
     const ImVec2 padding = use_frame_padding
         ? style.FramePadding
         : ImVec2(
-            style.FramePadding.x,
-            ImMin(window->DC.CurrLineTextBaseOffset, style.FramePadding.y));
+              style.FramePadding.x,
+              ImMin(window->DC.CurrLineTextBaseOffset, style.FramePadding.y));
 
     if (!label_end)
         label_end = FindRenderedTextEnd(label);
@@ -14986,9 +14986,9 @@ void ImGui::TabItemLabelAndCloseButton(ImDrawList *draw_list, const ImRect &bb,
     if (bb.GetWidth() <= 1.0f)
         return;
 
-        // In Style V2 we'll have full override of all colors per state (e.g.
-        // focused, selected) But right now if you want to alter text color of
-        // tabs this is what you need to do.
+    // In Style V2 we'll have full override of all colors per state (e.g.
+    // focused, selected) But right now if you want to alter text color of
+    // tabs this is what you need to do.
 #    if 0
     const float backup_alpha = g.Style.Alpha;
     if (!is_contents_visible)
