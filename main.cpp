@@ -11,8 +11,6 @@
 #include <iostream>
 #include <vector>
 
-// #include <glt_transform.hh>
-
 #include "GL/freeglut.h"
 #include "image.hh"
 #include "image_io.hh"
@@ -23,8 +21,6 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-// #define SAVE_RENDEflat R
 
 #define TEST_OPENGL_ERROR()                                                    \
     do                                                                         \
@@ -41,7 +37,6 @@ GLuint vbo_id;
 GLsizei planet_index_count = 0;
 Planet myPlanet;
 
-// === Planètes ===
 std::vector<Planet> planets;
 struct PlanetInstance {
     GLuint vao_id;
@@ -51,13 +46,11 @@ struct PlanetInstance {
 };
 std::vector<PlanetInstance> planetInstances;
 
-// === Caméra ===
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 17.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraPos = glm::vec3(0.0f, 15.0f, 55.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, -0.25f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float cameraSpeed = 0.2f;
 
-// === Caméra souris ===
 float yaw = -90.0f;
 float pitch = 0.0f;
 float lastMouseX = 512.0f;
@@ -65,18 +58,14 @@ float lastMouseY = 512.0f;
 bool firstMouse = true;
 float mouseSensitivity = 0.1f;
 
-// === Vagues ===
 float g_time = 0.0f;
 
-// === Fond étoilé ===
 GLuint sky_program_id;
 GLuint sky_vao_id;
 GLuint sky_vbo_id;
 
 void window_resize(int width, int height)
 {
-    // std::cout << "glViewport(0,0,"<< width << "," << height <<
-    // ");TEST_OPENGL_ERROR();" << std::endl;
     glViewport(0, 0, width, height);
     TEST_OPENGL_ERROR();
 }
@@ -85,8 +74,10 @@ void window_resize(int width, int height)
 bool saved = false;
 #endif
 
-void keyboard(unsigned char key, int /*x*/, int /*y*/)
+void keyboard(unsigned char key, int x, int y)
 {
+    ImGui_ImplGLUT_KeyboardFunc(key, x, y);
+
     ImGuiIO& io = ImGui::GetIO();
     if (io.WantCaptureKeyboard) return;
 
@@ -129,52 +120,53 @@ void update_camera()
     }
 }
 
-void mouse_motion(int x, int y)
-{
-    if (firstMouse)
-    {
+void mousemotion(int x, int y) {
+    ImGuiIO& io = ImGui::GetIO();
+    ImGui_ImplGLUT_MotionFunc(x, y);
+    if (io.WantCaptureMouse) {
+        firstMouse = true;
+        return;
+    }
+    if (firstMouse) {
         lastMouseX = x;
         lastMouseY = y;
         firstMouse = false;
         return;
     }
-
     float offsetX = (x - lastMouseX) * mouseSensitivity;
     float offsetY = (lastMouseY - y) * mouseSensitivity;
     lastMouseX = x;
     lastMouseY = y;
-
     yaw += offsetX;
     pitch += offsetY;
-
     if (pitch > 89.0f) pitch = 89.0f;
     if (pitch < -89.0f) pitch = -89.0f;
-
     glm::vec3 front;
     front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     front.y = sin(glm::radians(pitch));
     front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(front);
-
     glutPostRedisplay();
 }
 
 void mouse_button(int button, int state, int x, int y)
 {
-    ImGuiIO& io=ImGui::GetIO();
+    ImGui_ImplGLUT_MouseFunc(button, state, x, y);
+
+    ImGuiIO& io = ImGui::GetIO();
     if (io.WantCaptureMouse) return;
 
-    if (button==GLUT_LEFT_BUTTON)
+    if (button == GLUT_LEFT_BUTTON)
     {
-        if (state==GLUT_DOWN)
+        if (state == GLUT_DOWN)
         {
-            lastMouseX=x;
-            lastMouseY=y;
-            firstMouse=false;
+            lastMouseX = x;
+            lastMouseY = y;
+            firstMouse = false;
         }
         else
         {
-            firstMouse=true;
+            firstMouse = true;
         }
     }
 }
@@ -206,26 +198,29 @@ void display()
     ImGui::End();
     if (changed)
     {
-        planets[0].shapeGenerator.noiseFilter=nf;
-        planets[0].shapeGenerator.biomeFrequency=myPlanet.shapeGenerator.biomeFrequency;
-        planets[0].GeneratePlanet();
-        planetInstances[0].index_count=planets[0].planet_indices.size();
+        for (int i = 0; i < (int)planets.size() - 1; i++)
+        {
+            planets[i].shapeGenerator.noiseFilter = nf;
+            planets[i].shapeGenerator.biomeFrequency = planets[0].shapeGenerator.biomeFrequency;
+            planets[i].GeneratePlanet();
+            planetInstances[i].index_count = planets[i].planet_indices.size();
 
-        glBindVertexArray(planetInstances[0].vao_id);
-        glBindBuffer(GL_ARRAY_BUFFER, planetInstances[0].vbo_id);
-        glBufferData(GL_ARRAY_BUFFER,
-                     planets[0].planet_vertices.size()*sizeof(GLfloat),
-                     planets[0].planet_vertices.data(), GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planetInstances[0].ebo_id);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                     planets[0].planet_indices.size()*sizeof(GLuint),
-                     planets[0].planet_indices.data(), GL_STATIC_DRAW);
-        glBindVertexArray(0);
+            glBindVertexArray(planetInstances[i].vao_id);
+            glBindBuffer(GL_ARRAY_BUFFER, planetInstances[i].vbo_id);
+            glBufferData(GL_ARRAY_BUFFER,
+                         planets[i].planet_vertices.size() * sizeof(GLfloat),
+                         planets[i].planet_vertices.data(), GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planetInstances[i].ebo_id);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                         planets[i].planet_indices.size() * sizeof(GLuint),
+                         planets[i].planet_indices.data(), GL_STATIC_DRAW);
+            glBindVertexArray(0);
+        }
 
         glUseProgram(program_id);
-        GLint min_loc=glGetUniformLocation(program_id, "minElevation");
-        GLint max_loc=glGetUniformLocation(program_id, "maxElevation");
-        GLint radius_loc=glGetUniformLocation(program_id, "planetRadius");
+        GLint min_loc = glGetUniformLocation(program_id, "minElevation");
+        GLint max_loc = glGetUniformLocation(program_id, "maxElevation");
+        GLint radius_loc = glGetUniformLocation(program_id, "planetRadius");
         glUniform1f(min_loc, planets[0].shapeGenerator.elevationMinMax.Min);
         glUniform1f(max_loc, planets[0].shapeGenerator.elevationMinMax.Max);
         glUniform1f(radius_loc, planets[0].shapeGenerator.planetRadius);
@@ -236,7 +231,6 @@ void display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     TEST_OPENGL_ERROR();
 
-    // === Fond étoilé ===
     glDepthMask(GL_FALSE);
     glUseProgram(sky_program_id);
 
@@ -254,23 +248,12 @@ void display()
     glBindVertexArray(0);
     glDepthMask(GL_TRUE);
 
-    // === Planètes ===
     glUseProgram(program_id);
 
     GLint cam_loc  = glGetUniformLocation(program_id, "u_cameraPos");
     GLint time_loc2 = glGetUniformLocation(program_id, "u_time");
     glUniform3fv(cam_loc,   1, glm::value_ptr(cameraPos));
     glUniform1f(time_loc2, g_time);
-
-    for (int i = 1; i < (int)planets.size(); i++)
-    {
-        std::string pos_name = "u_reflPlanets[" + std::to_string(i-1) + "].center";
-        std::string rad_name = "u_reflPlanets[" + std::to_string(i-1) + "].radius";
-        GLint ploc = glGetUniformLocation(program_id, pos_name.c_str());
-        GLint rloc = glGetUniformLocation(program_id, rad_name.c_str());
-        glUniform3fv(ploc, 1, glm::value_ptr(planets[i].position));
-        glUniform1f(rloc, planets[i].shapeGenerator.planetRadius);
-    }
 
     for (int i = 0; i < (int)planets.size(); i++)
     {
@@ -305,9 +288,24 @@ void display()
             glUniform1f(rloc, planets[j].shapeGenerator.planetRadius);
             reflIdx++;
         }
+
+        int sunPlanetGlobalIdx = (int)planets.size() - 1;
+        int sunReflIdx = -1;
+        int tmpIdx2 = 0;
+        for (int j = 0; j < (int)planets.size(); j++)
+        {
+            if (j == i) continue;
+            if (j == sunPlanetGlobalIdx) { sunReflIdx = tmpIdx2; break; }
+            tmpIdx2++;
+        }
+        GLint sunrefl_loc = glGetUniformLocation(program_id, "u_reflSunIndex");
+        glUniform1i(sunrefl_loc, sunReflIdx);
+
         GLint nrefl_loc = glGetUniformLocation(program_id, "u_numReflPlanets");
         GLint cc_loc = glGetUniformLocation(program_id, "u_currentPlanetCenter");
         GLint cr_loc = glGetUniformLocation(program_id, "u_currentPlanetRadiusMax");
+        GLint sun_loc = glGetUniformLocation(program_id, "u_isSun");
+        glUniform1i(sun_loc, (i == (int)planets.size() - 1) ? 1 : 0);
         glUniform3fv(cc_loc, 1, glm::value_ptr(planets[i].position));
         glUniform1f(cr_loc,  planets[i].shapeGenerator.elevationMinMax.Max);
         glUniform1i(nrefl_loc, reflIdx);
@@ -328,12 +326,9 @@ void display()
         glReadPixels(150, 350, 800, 590, GL_RGB, GL_UNSIGNED_BYTE,
                      texture->pixels);
         TEST_OPENGL_ERROR();
-        // glReadPixels(0, 0, 1024, 1024, GL_RGB, GL_UNSIGNED_BYTE,
-        // texture->pixels);
         tifo::save_image(*texture, "render.tga");
         std::cout << "Save " << std::endl;
         delete texture;
-        // saved = true;
     }
 #endif
     glutSwapBuffers();
@@ -342,9 +337,7 @@ void display()
 
 void init_glut(int &argc, char *argv[])
 {
-    // glewExperimental = GL_TRUE;
     glutInit(&argc, argv);
-    /*glutInitContextVersion(4,5);*/
     glutInitContextProfile(GLUT_CORE_PROFILE | GLUT_DEBUG);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(1024, 1024);
@@ -441,18 +434,26 @@ void init_object_vbo()
 {
     Planet p0;
     p0.resolution = 256;
-    p0.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    p0.position = glm::vec3(22.0f, 0.0f, 0.0f);
     planets.push_back(p0);
 
     Planet p1;
     p1.resolution = 128;
-    p1.position = glm::vec3(12.0f, 3.0f, -5.0f);
+    p1.position = glm::vec3(-18.0f, 4.0f, 12.0f);
     planets.push_back(p1);
 
     Planet p2;
     p2.resolution = 128;
-    p2.position = glm::vec3(-10.0f, 5.0f, 8.0f);
+    p2.position = glm::vec3(5.0f, -8.0f, -28.0f);
     planets.push_back(p2);
+
+    Planet sun;
+    sun.resolution = 64;
+    sun.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    sun.shapeGenerator.planetRadius = 8.0f;
+    sun.shapeGenerator.noiseFilter.strength = 0.0f;
+    sun.shapeGenerator.noiseFilter.minValue = 999.0f;
+    planets.push_back(sun);
 
     for (auto& p : planets)
     {
@@ -460,6 +461,7 @@ void init_object_vbo()
         init_planet_instance(p, inst);
         planetInstances.push_back(inst);
     }
+
 
     glUseProgram(program_id);
     GLint min_loc = glGetUniformLocation(program_id, "minElevation");
@@ -615,7 +617,7 @@ bool load_and_compile_shader(const GLenum shader_type,
         char *shader_log;
         glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &log_size);
         shader_log = (char *)std::malloc(
-            log_size + 1); /* +1 pour le caractere de fin de chaine '\0' */
+            log_size + 1);
         if (shader_log != 0)
         {
             glGetShaderInfoLog(shader_id, log_size, &log_size, shader_log);
@@ -651,7 +653,7 @@ bool attach_and_link_program(const std::vector<GLuint> &shaders_id,
         char *program_log;
         glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &log_size);
         program_log = (char *)std::malloc(
-            log_size + 1); /* +1 pour le caractere de fin de chaine '\0' */
+            log_size + 1);
         if (program_log != 0)
         {
             glGetProgramInfoLog(program_id, log_size, &log_size, program_log);
@@ -669,7 +671,6 @@ bool attach_and_link_program(const std::vector<GLuint> &shaders_id,
         program_id = 0;
         return false;
     }
-    // glUseProgram(program_id);TEST_OPENGL_ERROR();
     return true;
 }
 
@@ -714,25 +715,6 @@ bool init_shaders()
     return true;
 }
 
-/*void tmp() {
-  glt::matrix4 look = glt::matrix4::identity();
-  glt::matrix4 frustum = glt::matrix4::identity();
-
-  glt::frustum(frustum,
-           -1, 1, -1, 1,
-           5, 50000
-         );
-
-  glt::look_at(look,
-           20, 20, 20,
-           0, 0, 0,
-           0, 1, 0
-           );
-
-  std::cout << "Look\n" << look << "\n";
-  std::cout << "frustum\n" << frustum << std::endl;
-  }*/
-
 bool init_sky_shader()
 {
     GLuint vert_id, frag_id;
@@ -764,7 +746,6 @@ void init_sky_vao()
 
 int main(int argc, char *argv[])
 {
-    //  tmp();
     init_glut(argc, argv);
     if (!init_glew())
         std::exit(-1);
@@ -777,7 +758,8 @@ int main(int argc, char *argv[])
     init_imgui();
     ImGui_ImplGLUT_InstallFuncs();
     glutKeyboardFunc(keyboard);
-    glutMotionFunc(mouse_motion);
+    glutMotionFunc(mousemotion);
+    glutPassiveMotionFunc(ImGui_ImplGLUT_MotionFunc);
     glutMouseFunc(mouse_button);
     glutMainLoop();
     ImGui_ImplOpenGL3_Shutdown();

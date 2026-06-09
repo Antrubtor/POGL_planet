@@ -17,6 +17,9 @@ uniform float u_time;
 uniform vec3 u_currentPlanetCenter;
 uniform float u_currentPlanetRadiusMax;
 
+uniform int u_isSun;
+uniform int u_reflSunIndex;
+
 struct ReflectedPlanet {
     vec3 center;
     float radius;
@@ -34,7 +37,6 @@ float sphereIntersect(vec3 ro, vec3 rd, vec3 center, float radius)
     return -b - sqrt(h);
 }
 
-// Bruit simple pour simuler le terrain dans les reflets
 float noiseHash(vec3 p)
 {
     p = fract(p * vec3(127.1, 311.7, 74.7));
@@ -68,24 +70,21 @@ float fbm(vec3 p, int octaves)
     return val;
 }
 
-// Couleur d'une planète réfléchie avec terrain procédural approximé
 vec3 planetSurfaceColor(vec3 hitPos, vec3 planetCenter, float pRadius,
     vec3 lightDir)
 {
     vec3 hitNormal = normalize(hitPos - planetCenter);
 
-    // Relief procédural approximé
     float noiseVal = fbm(hitNormal * 2.5, 5);
-    float elevation = noiseVal - 0.5; // centré sur 0
+    float elevation = noiseVal - 0.5;
 
-    // Hauteur normalisée pour les couleurs biomes
     float hp = clamp(elevation * 4.0 + 0.3, 0.0, 1.0);
 
-    vec3 col = mix(vec3(0.05, 0.30, 0.60), // ocean
-            mix(vec3(0.80, 0.70, 0.30), // sable
-                mix(vec3(0.20, 0.50, 0.20), // herbe
-                    mix(vec3(0.35, 0.32, 0.28), // roche
-                        vec3(0.92, 0.92, 0.95), // neige
+    vec3 col = mix(vec3(0.05, 0.30, 0.60),
+            mix(vec3(0.80, 0.70, 0.30),
+                mix(vec3(0.20, 0.50, 0.20),
+                    mix(vec3(0.35, 0.32, 0.28),
+                        vec3(0.92, 0.92, 0.95),
                         smoothstep(0.75, 0.90, hp)),
                     smoothstep(0.50, 0.65, hp)),
                 smoothstep(0.10, 0.25, hp)),
@@ -95,7 +94,14 @@ vec3 planetSurfaceColor(vec3 hitPos, vec3 planetCenter, float pRadius,
     return col * diff;
 }
 
-// Couleur du fond étoilé
+vec3 sunSurfaceColor(vec3 hitPos, vec3 sunCenter, vec3 lightDir)
+{
+    vec3 hitNormal = normalize(hitPos - sunCenter);
+    float n = fbm(hitNormal * 3.0, 3);
+    vec3 col = mix(vec3(1.0, 0.55, 0.05), vec3(1.0, 0.90, 0.2), n);
+    return col * 1.8;
+}
+
 float hash2(vec2 p)
 {
     return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
@@ -150,7 +156,6 @@ void main()
             / (planetRadius - minElevation);
     oceanDepthPercent = clamp(oceanDepthPercent, 0.0, 1.0);
 
-    // ---- Couleurs biomes ----
     vec3 b1_deep_ocean = vec3(0.01, 0.05, 0.20);
     vec3 b1_shallow_ocean = vec3(0.05, 0.30, 0.60);
     vec3 b1_sand = vec3(0.80, 0.70, 0.30);
@@ -169,10 +174,18 @@ void main()
 
     if (vUnclampedRadius < planetRadius)
     {
-        color_plains = mix(b1_shallow_ocean, b1_deep_ocean,
-                smoothstep(0.0, 0.8, oceanDepthPercent));
-        color_desert = mix(b2_shallow_ocean, b2_deep_ocean,
-                smoothstep(0.0, 0.8, oceanDepthPercent));
+        if (u_isSun == 1)
+        {
+            color_plains = vec3(1.0, 0.75, 0.1);
+            color_desert = vec3(1.0, 0.55, 0.05);
+        }
+        else
+        {
+            color_plains = mix(b1_shallow_ocean, b1_deep_ocean,
+                    smoothstep(0.0, 0.8, oceanDepthPercent));
+            color_desert = mix(b2_shallow_ocean, b2_deep_ocean,
+                    smoothstep(0.0, 0.8, oceanDepthPercent));
+        }
     }
     else
     {
@@ -188,10 +201,8 @@ void main()
     vec3 object_color = mix(color_plains, color_desert,
             smoothstep(0.3, 0.7, vBiome));
 
-    // Reflets de l'eau
-    if (vUnclampedRadius < planetRadius)
+    if (vUnclampedRadius < planetRadius && u_isSun == 0)
     {
-        // Normale perturbée par les vagues
         vec3 n = normalize(localPos);
         float w1 = sin(dot(n, vec3(1.0, 0.5, 0.8)) * 8.0 + u_time * 2.0);
         float w2 = sin(dot(n, vec3(-0.5, 1.0, 0.3)) * 5.0 + u_time * 1.5);
@@ -199,30 +210,24 @@ void main()
         vec3 t2 = normalize(cross(n, vec3(1.0, 0.001, 0.0)));
         vec3 waterNormal = normalize(n + t1 * w1 * 0.12 + t2 * w2 * 0.08);
 
-        // Réflexion de base
         vec3 viewDir = normalize(u_cameraPos - vWorldPos);
         vec3 reflDir = reflect(-viewDir, waterNormal);
 
-        // Déformation du contour du reflet avec du bruit fractal
         float cosTheta0 = max(dot(n, viewDir), 0.0);
 
-        // Bruit de distorsion angulaire — fréquence élevée pour des arêtes sharp
         float dNoise1 = fbm(localPos * 8.0, 4) - 0.5;
         float dNoise2 = fbm(localPos * 8.0 + vec3(17.3, 5.7, 11.9), 4) - 0.5;
         vec3 noisePerp1 = normalize(cross(reflDir, vec3(0.0, 1.0, 0.001)));
         vec3 noisePerp2 = normalize(cross(reflDir, noisePerp1));
 
-        // Amplitude de distorsion pour les pointes
         float distortAmp = mix(0.35, 0.08, cosTheta0 * cosTheta0);
         vec3 reflDirDistorted = normalize(reflDir
                     + noisePerp1 * dNoise1 * distortAmp
                     + noisePerp2 * dNoise2 * distortAmp);
 
-        // Fond étoilés
         vec3 spaceBase = vec3(0.0, 0.005, 0.02);
         vec3 envColor = spaceBase + skyColorInDir(reflDirDistorted);
 
-        // Reflet des planètes
         if (u_currentPlanetRadiusMax > 0.001)
         {
             float expandedRadius = u_currentPlanetRadiusMax * 1.08;
@@ -240,7 +245,6 @@ void main()
             }
         }
 
-        // Planètes voisines
         for (int i = 0; i < u_numReflPlanets; i++)
         {
             if (u_reflPlanets[i].radius < 0.001) continue;
@@ -250,19 +254,21 @@ void main()
             if (t > 0.0)
             {
                 vec3 hitPos = vWorldPos + reflDir * t;
-                vec3 pColor = planetSurfaceColor(hitPos,
-                        u_reflPlanets[i].center,
-                        u_reflPlanets[i].radius,
-                        lightDir);
+                vec3 pColor;
+                if (i == u_reflSunIndex)
+                    pColor = sunSurfaceColor(hitPos, u_reflPlanets[i].center, lightDir);
+                else
+                    pColor = planetSurfaceColor(hitPos,
+                            u_reflPlanets[i].center,
+                            u_reflPlanets[i].radius,
+                            lightDir);
                 envColor = max(envColor, pColor);
             }
         }
 
-        // Couleur de l'eau
         vec3 deepColor = mix(b1_shallow_ocean, b1_deep_ocean,
                 smoothstep(0.0, 0.8, oceanDepthPercent));
 
-        // Fresnel
         float fresnelNoise = fbm(n * 6.0 + u_time * 0.3, 3);
         float cosTheta = max(dot(waterNormal, viewDir), 0.0);
         float fresnel = 0.15 + 0.85 * pow(1.0 - cosTheta, 2.0);
@@ -272,7 +278,12 @@ void main()
     }
 
     vec3 ambient_color = vec3(0.15, 0.15, 0.15);
-    vec3 final_color = (ambient_color + diff) * object_color;
+    vec3 final_color;
+
+    if (u_isSun == 1)
+        final_color = object_color * 1.8;
+    else
+        final_color = (ambient_color + diff) * object_color;
 
     output_color = vec4(final_color, 1.0);
 }
