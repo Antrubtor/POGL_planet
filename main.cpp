@@ -816,7 +816,7 @@ int main(int argc, char *argv[])
     init_sky_shader();
     init_object_vbo();
     init_sky_vao();
-    init_textures();
+    // init_textures();
     init_imgui();
     ImGui_ImplGLUT_InstallFuncs();
     glutKeyboardFunc(keyboard);
